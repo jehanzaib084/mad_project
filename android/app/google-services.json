@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "738911688836",
+    "project_id": "madproject-f674c",
+    "storage_bucket": "madproject-f674c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:738911688836:android:b70ffbd063a3c9ce6c8ad1",
+        "android_client_info": {
+          "package_name": "com.zenva.mad_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAN15poALe7fgfIHfB3ka_QIr2XbG-Y-G0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
