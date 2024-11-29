@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/assets.dart';
 import 'package:mad_project/authentication/controller/auth_controller.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Register extends StatelessWidget {
   Register({super.key});
@@ -10,14 +11,32 @@ class Register extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  final AuthController _authController = Get.put(AuthController());
+  final AuthController _authController = Get.find<AuthController>(); // Use Get.find to get the existing instance
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
-      Get.toNamed('registerProfile', parameters: {
-        'email': _emailController.text,
-        'password': _passwordController.text,
-      });
+      try {
+        // Attempt to sign in with the email to check if it exists
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text,
+          password: 'dummyPassword',
+        );
+        // If signInWithEmailAndPassword doesn't throw an error, the email is already in use
+        Get.snackbar('Error', 'The email address is already in use by another account.');
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'user-not-found') {
+          // If the error code is 'user-not-found', the email is not in use
+          Get.toNamed('registerProfile', parameters: {
+            'email': _emailController.text,
+            'password': _passwordController.text,
+          });
+        } else {
+          // Handle other errors
+          Get.snackbar('Error', 'Failed to check email: ${e.message}');
+        }
+      } catch (e) {
+        Get.snackbar('Error', 'Failed to check email: ${e.toString()}');
+      }
     }
   }
 

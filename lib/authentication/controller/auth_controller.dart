@@ -50,7 +50,6 @@ class AuthController extends GetxController {
       profilePicUrl: profileImageBase64.value,
     );
     await signUp(email, password, userModel);
-    Get.offNamed('mainscreen');
   }
 
   Future<void> signOut() async {

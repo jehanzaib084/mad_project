@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/assets.dart';
+import 'package:mad_project/authentication/controller/auth_controller.dart';
 import 'firebase_options.dart';
 import 'pages/pages.dart';
 
@@ -11,6 +12,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  Get.put(AuthController());
   runApp(const MainApp());
 }
 
@@ -24,6 +26,8 @@ class MainApp extends StatelessWidget {
       // initialRoute: '/',
       theme: ThemeData(
         primaryColor: Assets.primaryColor,
+        scaffoldBackgroundColor: Colors.white,
+        dialogBackgroundColor: Colors.white,
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Assets.btnBgColor,
@@ -56,7 +60,7 @@ class MainApp extends StatelessWidget {
             Future.microtask(() => Get.offAllNamed('/login'));
             return Container();
           } else {
-             Future.microtask(() => Get.offAllNamed('/profile'));
+             Future.microtask(() => Get.offAllNamed('/masterNav'));
             return Container();
           }
         },

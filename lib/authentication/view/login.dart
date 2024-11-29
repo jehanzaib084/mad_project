@@ -9,13 +9,13 @@ class Login extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthController _authController = Get.put(AuthController());
+  final AuthController _authController = Get.find<AuthController>(); // Use Get.find to get the existing instance
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       await _authController.signIn(
           _emailController.text, _passwordController.text);
-      Get.offAllNamed('/profile');
+      Get.offAllNamed('/masterNav');
     }
   }
 

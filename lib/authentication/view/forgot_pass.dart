@@ -8,7 +8,7 @@ class Forgot extends StatelessWidget {
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
-  final AuthController _authController = Get.put(AuthController());
+  final AuthController _authController = Get.find<AuthController>(); // Use Get.find to get the existing instance
 
   Future<void> _sendResetEmail() async {
     if (_formKey.currentState!.validate()) {

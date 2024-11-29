@@ -12,7 +12,7 @@ class ProfileUpdateScreen extends StatelessWidget {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
-  final AuthController _authController = Get.put(AuthController());
+  final AuthController _authController = Get.find<AuthController>(); // Use Get.find to get the existing instance
 
   Future<void> _completeProfile() async {
     final email = Get.parameters['email']!;
@@ -25,7 +25,7 @@ class ProfileUpdateScreen extends StatelessWidget {
       int.parse(_ageController.text),
       _phoneNumberController.text,
     );
-    Get.offAllNamed('/profile');
+    Get.offAllNamed('/masterNav');
   }
 
   @override
