@@ -9,13 +9,20 @@ class Login extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthController _authController = Get.find<AuthController>(); // Use Get.find to get the existing instance
+  final AuthController _authController =
+      Get.find<AuthController>(); // Use Get.find to get the existing instance
 
-  Future<void> _login() async {
+  Future<void> _login(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
+      // Hide keyboard
+      FocusScope.of(context).unfocus();
+
       await _authController.signIn(
           _emailController.text, _passwordController.text);
-      Get.offAllNamed('/masterNav');
+
+      if (_authController.isLoading.value == false) {
+        Get.offAllNamed('/masterNav');
+      }
     }
   }
 
@@ -110,19 +117,33 @@ class Login extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         height: 50,
-                        child: ElevatedButton(
-                          onPressed: _login,
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            backgroundColor: Assets.btnBgColor,
-                          ),
-                          child: const Text(
-                            'Login',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
-                        ),
+                        child: Obx(() => ElevatedButton(
+                              onPressed: _authController.isLoading.value
+                                  ? null
+                                  : () => _login(context),
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                backgroundColor: Assets.btnBgColor,
+                              ),
+                              child: _authController.isLoading.value
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Login',
+                                      style: TextStyle(
+                                          fontSize: 18, color: Colors.white),
+                                    ),
+                            )),
                       ),
                       const SizedBox(height: 10),
                       Align(

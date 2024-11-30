@@ -13,8 +13,11 @@ class AuthController extends GetxController {
   var isConfirmPasswordVisible = false.obs;
   var profileImageBase64 = ''.obs;
 
+  final RxBool isLoading = false.obs;
+
   Future<void> signUp(String email, String password, UserModel userModel) async {
     try {
+      isLoading.value = true;
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -25,17 +28,22 @@ class AuthController extends GetxController {
       await _saveUserDataToPreferences(userModel);
     } on FirebaseAuthException catch (e) {
       Get.snackbar('Error', e.message ?? 'Sign up failed');
+    } finally {
+      isLoading.value = false;
     }
   }
 
   Future<void> signIn(String email, String password) async {
     try {
+      isLoading.value = true;
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
       DocumentSnapshot userDoc = await _firestore.collection('users').doc(userCredential.user!.uid).get();
       UserModel userModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
       await _saveUserDataToPreferences(userModel);
     } on FirebaseAuthException catch (e) {
       Get.snackbar('Error', e.message ?? 'Login failed');
+    } finally {
+      isLoading.value = false;
     }
   }
 

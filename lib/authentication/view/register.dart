@@ -15,28 +15,10 @@ class Register extends StatelessWidget {
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
-      try {
-        // Attempt to sign in with the email to check if it exists
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text,
-          password: 'dummyPassword',
-        );
-        // If signInWithEmailAndPassword doesn't throw an error, the email is already in use
-        Get.snackbar('Error', 'The email address is already in use by another account.');
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'user-not-found') {
-          // If the error code is 'user-not-found', the email is not in use
-          Get.toNamed('registerProfile', parameters: {
+      Get.toNamed('registerProfile', parameters: {
             'email': _emailController.text,
             'password': _passwordController.text,
           });
-        } else {
-          // Handle other errors
-          Get.snackbar('Error', 'Failed to check email: ${e.message}');
-        }
-      } catch (e) {
-        Get.snackbar('Error', 'Failed to check email: ${e.toString()}');
-      }
     }
   }
 

@@ -12,20 +12,33 @@ class ProfileUpdateScreen extends StatelessWidget {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
-  final AuthController _authController = Get.find<AuthController>(); // Use Get.find to get the existing instance
+  final AuthController _authController =
+      Get.find<AuthController>(); // Use Get.find to get the existing instance
 
-  Future<void> _completeProfile() async {
-    final email = Get.parameters['email']!;
-    final password = Get.parameters['password']!;
-    await _authController.completeProfile(
-      email,
-      password,
-      _firstNameController.text,
-      _lastNameController.text,
-      int.parse(_ageController.text),
-      _phoneNumberController.text,
-    );
-    Get.offAllNamed('/masterNav');
+  Future<void> _completeProfile(BuildContext context) async {
+    // Hide keyboard
+    FocusScope.of(context).unfocus();
+
+    try {
+      _authController.isLoading.value = true;
+      final email = Get.parameters['email']!;
+      final password = Get.parameters['password']!;
+
+      await _authController.completeProfile(
+        email,
+        password,
+        _firstNameController.text,
+        _lastNameController.text,
+        int.parse(_ageController.text),
+        _phoneNumberController.text,
+      );
+
+      Get.offAllNamed('/masterNav');
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to complete profile: ${e.toString()}');
+    } finally {
+      _authController.isLoading.value = false;
+    }
   }
 
   @override
@@ -151,19 +164,32 @@ class ProfileUpdateScreen extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     height: 50,
-                    child: ElevatedButton(
-                      onPressed: _completeProfile,
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        backgroundColor: Assets.btnBgColor,
-                      ),
-                      child: const Text(
-                        'Proceed',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                    ),
+                    child: Obx(() => ElevatedButton(
+                          onPressed: _authController.isLoading.value
+                              ? null
+                              : () => _completeProfile(context),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            backgroundColor: Assets.btnBgColor,
+                          ),
+                          child: _authController.isLoading.value
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                )
+                              : const Text(
+                                  'Complete Profile',
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.white),
+                                ),
+                        )),
                   ),
                 ],
               ),
