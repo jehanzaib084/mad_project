@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/assets.dart';
 import 'package:mad_project/authentication/controller/auth_controller.dart';
+import 'package:mad_project/home_screens/posts_screens/controller/favorite_controller.dart';
 import 'firebase_options.dart';
 import 'pages/pages.dart';
 
@@ -13,6 +14,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   Get.put(AuthController());
+  Get.put(FavoriteController());
   runApp(const MainApp());
 }
 

@@ -1,70 +1,44 @@
+// lib/home_screens/posts_screens/view/favorite_posts.dart
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mad_project/home_screens/posts_screens/controller/favorite_controller.dart';
-import 'package:mad_project/home_screens/posts_screens/controller/posts_screen_controller.dart';
-import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
 import 'package:mad_project/home_screens/posts_screens/view/post_detail_view.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
-class PostsList extends StatelessWidget {
-  final PostController postController = Get.put(PostController());
+class FavoritePostsScreen extends StatelessWidget {
+  final FavoriteController favoriteController = Get.find<FavoriteController>();
 
-  PostsList({super.key});
+  FavoritePostsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Top Posts'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // Handle notifications
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              // Handle filter
-            },
-          ),
-        ],
+        title: const Text('Favorite Posts'),
       ),
       body: Obx(() {
-        if (postController.isLoading.value) {
-          return Center(child: CircularProgressIndicator());
-        } else if (postController.pagingController.itemList == null ||
-            postController.pagingController.itemList!.isEmpty) {
-          return Center(
-            child: Text(
-              'No posts available',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+        final favorites = favoriteController.favorites;
+        
+        if (favorites.isEmpty) {
+          return const Center(
+            child: Text('No favorite posts yet'),
           );
-        } else {
-          return PagedListView<int, Post>(
-            pagingController: postController.pagingController,
-            builderDelegate: PagedChildBuilderDelegate<Post>(
-              itemBuilder: (context, post, index) => GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PostDetailView(
-                        post: post,
-                        isLoved: false,
-                        onLoveToggle: () {},
-                      ),
-                    ),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Card(
-                    shape: RoundedRectangleBorder(
+        }
+
+        return ListView.builder(
+          itemCount: favorites.length,
+          itemBuilder: (context, index) {
+            final post = favorites[index];
+            return GestureDetector(
+              onTap: () => Get.to(() => PostDetailView(
+                post: post,
+                isLoved: true,
+                onLoveToggle: () => favoriteController.toggleFavorite(post),
+              )),
+              child: Card(
+                shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15.0),
                     ),
                     child: Column(
@@ -173,30 +147,10 @@ class PostsList extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ),
-                ),
               ),
-              firstPageProgressIndicatorBuilder: (context) => Center(
-                child: CircularProgressIndicator(),
-              ),
-              newPageProgressIndicatorBuilder: (context) => Center(
-                child: CircularProgressIndicator(),
-              ),
-              firstPageErrorIndicatorBuilder: (context) => Center(
-                child: Text(
-                  'Error loading posts',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-              newPageErrorIndicatorBuilder: (context) => Center(
-                child: Text(
-                  'Error loading more posts',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-            ),
-          );
-        }
+            );
+          },
+        );
       }),
     );
   }

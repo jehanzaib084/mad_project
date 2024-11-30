@@ -49,4 +49,23 @@ class Post {
       rating: json['rating'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'propertyName': propertyName,
+      'propertyType': propertyType,
+      'description': description,
+      'image': image,
+      'beds': beds,
+      'washrooms': washrooms,
+      'garage': garage,
+      'gas': gas,
+      'light': light,
+      'water': water,
+      'dateRange': dateRange,
+      'price': price,
+      'rating': rating,
+    };
+  }
 }

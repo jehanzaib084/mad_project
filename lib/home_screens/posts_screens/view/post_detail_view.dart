@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_getx_widget.dart';
+import 'package:mad_project/home_screens/posts_screens/controller/favorite_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -134,11 +138,18 @@ class PostDetailView extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(
-                      isLoved ? Icons.favorite : Icons.favorite_border,
-                      color: isLoved ? Colors.red : Colors.grey,
+                    icon: GetX<FavoriteController>(
+                      builder: (controller) => Icon(
+                        controller.isFavorite(post.id)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: controller.isFavorite(post.id)
+                            ? Colors.red
+                            : Colors.grey,
+                      ),
                     ),
-                    onPressed: onLoveToggle,
+                    onPressed: () =>
+                        Get.find<FavoriteController>().toggleFavorite(post),
                   ),
                 ],
               ),

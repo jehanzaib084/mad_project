@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:mad_project/home_screens/posts_screens/view/favourite_posts.dart';
 import 'package:mad_project/home_screens/posts_screens/view/posts_list.dart';
 import 'package:mad_project/home_screens/profile_crud/view/profile_view.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 class MasterNav extends StatelessWidget {
   const MasterNav({super.key});
+  
 
   List<Widget> _buildScreens() {
-    return [
-      PostsList(),
-      Center(child: Text('Favourite Screen')),
-      Center(child: Text('Create Post Screen')),
-      Center(child: Text('My Posts Screen')),
-      ProfileScreen(),
-    ];
-  }
+  return [
+    PostsList(),
+    FavoritePostsScreen(),
+    Center(child: Text('Create Post Screen')),
+    Center(child: Text('My Posts Screen')),
+    ProfileScreen(),
+  ];
+}
 
   List<PersistentBottomNavBarItem> _navBarsItems() {
     return [
