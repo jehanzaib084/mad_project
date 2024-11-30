@@ -28,6 +28,13 @@ class MainApp extends StatelessWidget {
         primaryColor: Assets.primaryColor,
         scaffoldBackgroundColor: Colors.white,
         dialogBackgroundColor: Colors.white,
+        textTheme: TextTheme(
+          titleLarge: TextStyle(
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
+            color: Assets.primaryColor,
+          ),
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Assets.btnBgColor,
@@ -52,6 +59,7 @@ class MainApp extends StatelessWidget {
             foregroundColor: Assets.lightTextColor,
           ),
         ),
+        
       ),
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
