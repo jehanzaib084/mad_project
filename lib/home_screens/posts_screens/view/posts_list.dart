@@ -119,7 +119,7 @@ class PostsList extends StatelessWidget {
                                           : Icons.favorite_border,
                                       color: controller.isFavorite(post.id)
                                           ? Colors.red
-                                          : Colors.yellow,
+                                          : Colors.black,
                                     ),
                                     onPressed: () =>
                                         controller.toggleFavorite(post),
@@ -149,16 +149,6 @@ class PostsList extends StatelessWidget {
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(
-                            post.dateRange,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
                           ),
                         ),
                         Padding(
@@ -201,3 +191,4 @@ class PostsList extends StatelessWidget {
     );
   }
 }
+

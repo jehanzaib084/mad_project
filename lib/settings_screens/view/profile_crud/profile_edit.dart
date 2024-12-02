@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/authentication/model/user_model.dart';
-import 'package:mad_project/home_screens/profile_crud/controller/profile_controller.dart';
+import 'package:mad_project/settings_screens/controller/profile_controller.dart';
 
 class ProfileEdit extends StatelessWidget {
   final String uid;
@@ -26,7 +26,6 @@ class ProfileEdit extends StatelessWidget {
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final ProfileController _profileController = Get.find();
@@ -35,7 +34,6 @@ class ProfileEdit extends StatelessWidget {
   Widget build(BuildContext context) {
     _firstNameController.text = firstName;
     _lastNameController.text = lastName;
-    _emailController.text = email;
     _ageController.text = age;
     _phoneNumberController.text = phoneNumber;
 
@@ -103,18 +101,6 @@ class ProfileEdit extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    prefixIcon: const Icon(Icons.email),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 16),
-                TextField(
                   controller: _ageController,
                   decoration: InputDecoration(
                     labelText: 'Age',
@@ -159,7 +145,7 @@ class ProfileEdit extends StatelessWidget {
                         lastName: _lastNameController.text,
                         age: int.parse(_ageController.text),
                         phoneNumber: _phoneNumberController.text,
-                        email: _emailController.text,
+                        email: email, // Email is not editable
                         profilePicUrl: _profileController.userModel.value.profilePicUrl,
                       );
                       _profileController.updateUserData(updatedUser);

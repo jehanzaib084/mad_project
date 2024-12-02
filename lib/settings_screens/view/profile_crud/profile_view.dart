@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mad_project/home_screens/profile_crud/controller/profile_controller.dart';
-import 'package:mad_project/home_screens/profile_crud/view/profile_edit.dart';
+import 'package:mad_project/settings_screens/controller/profile_controller.dart';
+import 'package:mad_project/settings_screens/view/profile_crud/profile_edit.dart';
 import 'dart:convert';
 
 class ProfileScreen extends StatelessWidget {
@@ -95,25 +95,6 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          _profileController.logout();
-                        },
-                        style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          side: const BorderSide(color: Colors.red),
-                        ),
-                        child: const Text(
-                          'Logout',
-                          style: TextStyle(fontSize: 18, color: Colors.red),
-                        ),
-                      ),
-                    ),
                   ],
                 );
               }),

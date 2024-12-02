@@ -28,8 +28,8 @@ class MainApp extends StatelessWidget {
       // initialRoute: '/',
       theme: ThemeData(
         primaryColor: Assets.primaryColor,
-        scaffoldBackgroundColor: Colors.white,
-        dialogBackgroundColor: Colors.white,
+
+        
         textTheme: TextTheme(
           titleLarge: TextStyle(
             fontSize: 20.0,

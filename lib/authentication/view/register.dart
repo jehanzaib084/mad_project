@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/assets.dart';
 import 'package:mad_project/authentication/controller/auth_controller.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class Register extends StatelessWidget {
   Register({super.key});
