@@ -8,31 +8,79 @@ class Forgot extends StatelessWidget {
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
-  final AuthController _authController = Get.find<AuthController>(); // Use Get.find to get the existing instance
+  final AuthController _authController = Get.find<AuthController>();
+  final RxBool isLoading = false.obs;
 
-  Future<void> _sendResetEmail() async {
+  Future<void> _sendResetEmail(BuildContext context) async {
+    // Hide keyboard
+    FocusScope.of(context).unfocus();
+
     if (_formKey.currentState!.validate()) {
-      await _authController.sendPasswordResetEmail(_emailController.text);
-      Get.defaultDialog(
-        title: 'Success',
-        titlePadding: EdgeInsets.only(top: 20.0),
-        titleStyle: TextStyle(
+      try {
+        isLoading.value = true;
+        await _authController.sendPasswordResetEmail(_emailController.text);
+        
+        Get.defaultDialog(
+          title: 'Success!',
+          titlePadding: const EdgeInsets.only(top: 25.0),
+          titleStyle: const TextStyle(
             color: Assets.primaryColor,
-            fontSize: 30,
-            fontWeight: FontWeight.bold),
-        middleText: 'Password reset email sent.\n Please check your email.',
-        middleTextStyle: TextStyle(color: Assets.lightTextColor, fontSize: 18),
-        textConfirm: 'Got it!',
-        confirmTextColor: Colors.white,
-        buttonColor: Assets.btnBgColor,
-        onConfirm: () {
-          Get.back();
-          Get.offNamed('/login');
-        },
-        barrierDismissible: false,
-        contentPadding:
-            EdgeInsets.only(left: 10.0, right: 10.0, bottom: 20.0, top: 10.0),
-      );
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+          ),
+          content: Column(
+            children: [
+              const Icon(
+                Icons.mark_email_read_outlined,
+                size: 70,
+                color: Assets.primaryColor,
+              ),
+              const SizedBox(height: 15),
+              const Text(
+                'Password reset email sent',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Please check your inbox and follow\nthe instructions in the email',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Assets.lightTextColor,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+          confirm: SizedBox(
+            width: 200,
+            child: ElevatedButton(
+              onPressed: () {
+                Get.back();
+                Get.offNamed('/login');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Assets.btnBgColor,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Back to Login',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+          ),
+          barrierDismissible: false,
+          radius: 12,
+        );
+      } finally {
+        isLoading.value = false;
+      }
     }
   }
 
@@ -41,17 +89,15 @@ class Forgot extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.transparent, // No background color
-          elevation: 0, // Remove the shadow
-          iconTheme: IconThemeData(color: Colors.black), // Set the icon color
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.black),
           leading: IconButton(
-            icon: Padding(
-              padding: const EdgeInsets.only(left: 6.0),
-              child: const Icon(Icons.arrow_back),
+            icon: const Padding(
+              padding: EdgeInsets.only(left: 6.0),
+              child: Icon(Icons.arrow_back),
             ),
-            onPressed: () {
-              Get.back();
-            },
+            onPressed: () => Get.back(),
           ),
         ),
         body: Container(
@@ -72,13 +118,17 @@ class Forgot extends StatelessWidget {
                       const Text(
                         'Forgot Password',
                         style: TextStyle(
-                            fontSize: 40, fontWeight: FontWeight.bold),
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 10),
                       const Text(
                         'Worry not we are here to help :)',
                         style: TextStyle(
-                            fontSize: 16, color: Assets.lightTextColor),
+                          fontSize: 16,
+                          color: Assets.lightTextColor,
+                        ),
                       ),
                       const SizedBox(height: 30),
                       TextFormField(
@@ -93,24 +143,36 @@ class Forgot extends StatelessWidget {
                         ),
                         validator: _authController.validateEmail,
                       ),
-                      const SizedBox(height: 10),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 40),
                       SizedBox(
                         width: double.infinity,
                         height: 50,
-                        child: ElevatedButton(
-                          onPressed: _sendResetEmail,
+                        child: Obx(() => ElevatedButton(
+                          onPressed: isLoading.value 
+                              ? null 
+                              : () => _sendResetEmail(context),
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                             backgroundColor: Assets.btnBgColor,
                           ),
-                          child: const Text(
-                            'Send Reset Email',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
-                        ),
+                          child: isLoading.value
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                )
+                              : const Text(
+                                  'Send Reset Email',
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.white),
+                                ),
+                        )),
                       ),
                     ],
                   ),

@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:mad_project/authentication/view/forgot_pass.dart';
+import 'package:mad_project/authentication/view/intro_screen.dart';
 import 'package:mad_project/authentication/view/login.dart';
 import 'package:mad_project/authentication/view/register.dart';
 import 'package:mad_project/authentication/view/register_profile.dart';
@@ -33,5 +34,6 @@ class AppPages {
     GetPage(name: '/faq_screen', page: () => FAQScreen()),
     GetPage(name: '/terms_screen', page: () => TermsScreen()),
     GetPage(name: '/about_screen', page: () => AboutScreen()),
+    GetPage(name: '/intro', page: () => const IntroScreen()),
   ];
 }

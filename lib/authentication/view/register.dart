@@ -11,13 +11,36 @@ class Register extends StatelessWidget {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   final AuthController _authController = Get.find<AuthController>(); // Use Get.find to get the existing instance
+  final RxBool isLoading = false.obs;
 
-  Future<void> _register() async {
+  Future<void> _register(BuildContext context) async {
+    // Hide keyboard
+    FocusScope.of(context).unfocus();
+    
     if (_formKey.currentState!.validate()) {
-      Get.toNamed('registerProfile', parameters: {
-            'email': _emailController.text,
-            'password': _passwordController.text,
-          });
+      try {
+        isLoading.value = true;
+        
+        // Check if email exists
+        final bool emailExists = await _authController.isEmailAlreadyExists(_emailController.text);
+        
+        if (emailExists) {
+          Get.snackbar(
+            'Error',
+            'This email is already registered. Please use a different email or try logging in.',
+          );
+          return;
+        }
+
+        // If email doesn't exist, proceed to next page
+        Get.toNamed('registerProfile', parameters: {
+          'email': _emailController.text,
+          'password': _passwordController.text,
+        });
+
+      } finally {
+        isLoading.value = false;
+      }
     }
   }
 
@@ -116,22 +139,35 @@ class Register extends StatelessWidget {
                       }),
                       const SizedBox(height: 30),
                       SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: _register,
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            backgroundColor: Assets.btnBgColor,
-                          ),
-                          child: const Text(
-                            'Signup',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
-                        ),
-                      ),
+      width: double.infinity,
+      height: 50,
+      child: Obx(() => ElevatedButton(
+        onPressed: isLoading.value 
+            ? null 
+            : () => _register(context),
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          backgroundColor: Assets.btnBgColor,
+        ),
+        child: isLoading.value
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      Colors.white),
+                ),
+              )
+            : const Text(
+                'Register',
+                style: TextStyle(
+                    fontSize: 18, color: Colors.white),
+              ),
+      )),
+    ),
                       const SizedBox(height: 10),
                       Align(
                         alignment: Alignment.center,

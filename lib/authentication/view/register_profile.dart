@@ -13,10 +13,10 @@ class ProfileUpdateScreen extends StatelessWidget {
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final AuthController _authController =
-      Get.find<AuthController>(); // Use Get.find to get the existing instance
+      Get.find<AuthController>();
 
   Future<void> _completeProfile(BuildContext context) async {
-    // Hide keyboard
+    
     FocusScope.of(context).unfocus();
 
     try {
