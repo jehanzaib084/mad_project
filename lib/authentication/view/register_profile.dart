@@ -23,6 +23,7 @@ class ProfileUpdateScreen extends StatelessWidget {
       _authController.isLoading.value = true;
       final email = Get.parameters['email']!;
       final password = Get.parameters['password']!;
+      final role = Get.parameters['role']!;
 
       await _authController.completeProfile(
         email,
@@ -31,6 +32,7 @@ class ProfileUpdateScreen extends StatelessWidget {
         _lastNameController.text,
         int.parse(_ageController.text),
         _phoneNumberController.text,
+        role,
       );
 
       Get.offAllNamed('/masterNav');

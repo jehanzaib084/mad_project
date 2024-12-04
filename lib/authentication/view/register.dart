@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/assets.dart';
 import 'package:mad_project/authentication/controller/auth_controller.dart';
+import 'package:mad_project/authentication/model/user_model.dart';
 
 class Register extends StatelessWidget {
   Register({super.key});
@@ -9,21 +10,25 @@ class Register extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  final AuthController _authController = Get.find<AuthController>(); // Use Get.find to get the existing instance
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  final AuthController _authController =
+      Get.find<AuthController>();
   final RxBool isLoading = false.obs;
+  final RxString selectedRole = ''.obs;
 
   Future<void> _register(BuildContext context) async {
     // Hide keyboard
     FocusScope.of(context).unfocus();
-    
+
     if (_formKey.currentState!.validate()) {
       try {
         isLoading.value = true;
-        
+
         // Check if email exists
-        final bool emailExists = await _authController.isEmailAlreadyExists(_emailController.text);
-        
+        final bool emailExists =
+            await _authController.isEmailAlreadyExists(_emailController.text);
+
         if (emailExists) {
           Get.snackbar(
             'Error',
@@ -36,159 +41,253 @@ class Register extends StatelessWidget {
         Get.toNamed('registerProfile', parameters: {
           'email': _emailController.text,
           'password': _passwordController.text,
+          'role': selectedRole.value,
         });
-
       } finally {
         isLoading.value = false;
       }
     }
   }
 
+  Widget _buildRoleSelection() {
+    return Column(
+      children: [
+        const Text(
+          'Select Your Role',
+          style: TextStyle(
+              fontSize: 40,
+              fontWeight: FontWeight.bold,
+              color: Assets.primaryColor),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          'Are you a student or hostel owner?',
+          style: TextStyle(fontSize: 16, color: Assets.lightTextColor),
+        ),
+        const SizedBox(height: 50),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildRoleCard(
+              'Student',
+              Icons.school,
+              UserRole.student,
+            ),
+            _buildRoleCard(
+              'Hostel Owner',
+              Icons.business,
+              UserRole.owner,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRoleCard(String title, IconData icon, UserRole role) {
+    return Obx(() => GestureDetector(
+          onTap: () => selectedRole.value = role.toString(),
+          child: Container(
+            width: 150,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: selectedRole.value == role.toString()
+                  ? Assets.primaryColor.withOpacity(0.1)
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: selectedRole.value == role.toString()
+                    ? Assets.primaryColor
+                    : Colors.grey.shade300,
+                width: 2,
+              ),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  icon,
+                  size: 50,
+                  color: Assets.primaryColor,
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(Assets.backgroundImage),
-              fit: BoxFit.cover,
-            ),
+        child: Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(Assets.backgroundImage),
+            fit: BoxFit.cover,
           ),
-          child: Center(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Register',
-                        style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Assets.primaryColor),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Good to see you back!',
-                        style: TextStyle(fontSize: 16, color: Assets.lightTextColor),
-                      ),
-                      const SizedBox(height: 50),
-                      TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          labelText: 'Email',
-                          prefixIcon: const Icon(Icons.email_outlined),
-                        ),
-                        validator: _authController.validateEmail,
-                      ),
-                      const SizedBox(height: 20),
-                      Obx(() {
-                        return TextFormField(
-                          controller: _passwordController,
-                          keyboardType: TextInputType.visiblePassword,
-                          obscureText: !_authController.isPasswordVisible.value,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            labelText: 'Password',
-                            prefixIcon: const Icon(Icons.lock_outline_rounded),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _authController.isPasswordVisible.value
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                              ),
-                              onPressed: () {
-                                _authController.isPasswordVisible.toggle();
-                              },
-                            ),
-                          ),
-                          validator: _authController.validatePassword,
-                        );
-                      }),
-                      const SizedBox(height: 20),
-                      Obx(() {
-                        return TextFormField(
-                          controller: _confirmPasswordController,
-                          keyboardType: TextInputType.visiblePassword,
-                          obscureText: !_authController.isConfirmPasswordVisible.value,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            labelText: 'Confirm Password',
-                            prefixIcon: const Icon(Icons.lock_outline_rounded),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _authController.isConfirmPasswordVisible.value
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                              ),
-                              onPressed: () {
-                                _authController.isConfirmPasswordVisible.toggle();
-                              },
-                            ),
-                          ),
-                          validator: (value) => _authController.validateConfirmPassword(value, _passwordController.text),
-                        );
-                      }),
-                      const SizedBox(height: 30),
-                      SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: Obx(() => ElevatedButton(
-        onPressed: isLoading.value 
-            ? null 
-            : () => _register(context),
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          backgroundColor: Assets.btnBgColor,
         ),
-        child: isLoading.value
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.white),
-                ),
-              )
-            : const Text(
-                'Register',
-                style: TextStyle(
-                    fontSize: 18, color: Colors.white),
-              ),
-      )),
-    ),
-                      const SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.center,
-                        child: TextButton(
-                          onPressed: () {
-                            Get.offNamed('/login');
-                          },
-                          child: const Text(
-                            'Already have account?',
-                            style: TextStyle(color: Assets.lightTextColor, fontSize: 16),
-                          ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Obx(
+                () => selectedRole.value.isEmpty
+                    ? _buildRoleSelection()
+                    : Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            const Text(
+                              'Register',
+                              style: TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
+                                  color: Assets.primaryColor),
+                            ),
+                            const SizedBox(height: 10),
+                            const Text(
+                              'Good to see you back!',
+                              style: TextStyle(
+                                  fontSize: 16, color: Assets.lightTextColor),
+                            ),
+                            const SizedBox(height: 50),
+                            TextFormField(
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                labelText: 'Email',
+                                prefixIcon: const Icon(Icons.email_outlined),
+                              ),
+                              validator: _authController.validateEmail,
+                            ),
+                            const SizedBox(height: 20),
+                            Obx(() {
+                              return TextFormField(
+                                controller: _passwordController,
+                                keyboardType: TextInputType.visiblePassword,
+                                obscureText:
+                                    !_authController.isPasswordVisible.value,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  labelText: 'Password',
+                                  prefixIcon:
+                                      const Icon(Icons.lock_outline_rounded),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _authController.isPasswordVisible.value
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                    ),
+                                    onPressed: () {
+                                      _authController.isPasswordVisible
+                                          .toggle();
+                                    },
+                                  ),
+                                ),
+                                validator: _authController.validatePassword,
+                              );
+                            }),
+                            const SizedBox(height: 20),
+                            Obx(() {
+                              return TextFormField(
+                                controller: _confirmPasswordController,
+                                keyboardType: TextInputType.visiblePassword,
+                                obscureText: !_authController
+                                    .isConfirmPasswordVisible.value,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  labelText: 'Confirm Password',
+                                  prefixIcon:
+                                      const Icon(Icons.lock_outline_rounded),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _authController
+                                              .isConfirmPasswordVisible.value
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                    ),
+                                    onPressed: () {
+                                      _authController.isConfirmPasswordVisible
+                                          .toggle();
+                                    },
+                                  ),
+                                ),
+                                validator: (value) =>
+                                    _authController.validateConfirmPassword(
+                                        value, _passwordController.text),
+                              );
+                            }),
+                            const SizedBox(height: 30),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: Obx(() => ElevatedButton(
+                                    onPressed: isLoading.value
+                                        ? null
+                                        : () => _register(context),
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      backgroundColor: Assets.btnBgColor,
+                                    ),
+                                    child: isLoading.value
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                      Colors.white),
+                                            ),
+                                          )
+                                        : const Text(
+                                            'Register',
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                color: Colors.white),
+                                          ),
+                                  )),
+                            ),
+                            const SizedBox(height: 10),
+                            Align(
+                              alignment: Alignment.center,
+                              child: TextButton(
+                                onPressed: () {
+                                  Get.offNamed('/login');
+                                },
+                                child: const Text(
+                                  'Already have account?',
+                                  style: TextStyle(
+                                      color: Assets.lightTextColor,
+                                      fontSize: 16),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
               ),
             ),
           ),
         ),
       ),
-    );
+    ));
   }
 }

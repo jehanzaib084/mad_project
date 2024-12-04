@@ -71,7 +71,8 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> completeProfile(String email, String password, String firstName, String lastName, int age, String phoneNumber) async {
+  Future<void> completeProfile(String email, String password, String firstName, 
+      String lastName, int age, String phoneNumber, String role) async {
     UserModel userModel = UserModel(
       uid: '',
       firstName: firstName,
@@ -80,6 +81,9 @@ class AuthController extends GetxController {
       phoneNumber: phoneNumber,
       email: email,
       profilePicUrl: profileImageBase64.value,
+      role: UserRole.values.firstWhere(
+        (e) => e.toString() == role,
+      ),
     );
     await signUp(email, password, userModel);
   }
@@ -99,6 +103,7 @@ class AuthController extends GetxController {
     await prefs.setString('phoneNumber', userModel.phoneNumber);
     await prefs.setString('email', userModel.email);
     await prefs.setString('profilePicUrl', userModel.profilePicUrl);
+    await prefs.setString('role', userModel.role.toString().split('.').last);
   }
 
   String? validateEmail(String? value) {

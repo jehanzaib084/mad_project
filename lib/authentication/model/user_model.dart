@@ -1,3 +1,8 @@
+enum UserRole {
+  student,
+  owner
+}
+
 class UserModel {
   String uid;
   String firstName;
@@ -6,6 +11,7 @@ class UserModel {
   String phoneNumber;
   String email;
   String profilePicUrl;
+  final UserRole role;
 
   UserModel({
     required this.uid,
@@ -15,6 +21,7 @@ class UserModel {
     required this.phoneNumber,
     required this.email,
     required this.profilePicUrl,
+    required this.role,
   });
 
   Map<String, dynamic> toMap() {
@@ -26,6 +33,7 @@ class UserModel {
       'phoneNumber': phoneNumber,
       'email': email,
       'profilePicUrl': profilePicUrl,
+      'role': role.toString().split('.').last,
     };
   }
 
@@ -38,6 +46,9 @@ class UserModel {
       phoneNumber: map['phoneNumber'],
       email: map['email'],
       profilePicUrl: map['profilePicUrl'],
+      role: UserRole.values.firstWhere(
+        (e) => e.toString().split('.').last == map['role'],
+      ),
     );
   }
 }

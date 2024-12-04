@@ -80,6 +80,7 @@ class ProfileScreen extends StatelessWidget {
                             age: user.age.toString(),
                             phoneNumber: user.phoneNumber,
                             profilePicUrl: user.profilePicUrl,
+                            role: user.role,
                           ));
                         },
                         style: ElevatedButton.styleFrom(

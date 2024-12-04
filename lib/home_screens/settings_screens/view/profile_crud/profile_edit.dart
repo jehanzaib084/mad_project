@@ -12,6 +12,7 @@ class ProfileEdit extends StatelessWidget {
   final String age;
   final String phoneNumber;
   final String profilePicUrl;
+  final UserRole role;
 
   ProfileEdit({
     super.key,
@@ -22,6 +23,7 @@ class ProfileEdit extends StatelessWidget {
     required this.age,
     required this.phoneNumber,
     required this.profilePicUrl,
+    required this.role,
   });
 
   final TextEditingController _firstNameController = TextEditingController();
@@ -30,12 +32,14 @@ class ProfileEdit extends StatelessWidget {
   final TextEditingController _phoneNumberController = TextEditingController();
   final ProfileController _profileController = Get.find();
 
+
   @override
   Widget build(BuildContext context) {
     _firstNameController.text = firstName;
     _lastNameController.text = lastName;
     _ageController.text = age;
     _phoneNumberController.text = phoneNumber;
+    
 
     return Scaffold(
       appBar: AppBar(
@@ -145,8 +149,9 @@ class ProfileEdit extends StatelessWidget {
                         lastName: _lastNameController.text,
                         age: int.parse(_ageController.text),
                         phoneNumber: _phoneNumberController.text,
-                        email: email, // Email is not editable
+                        email: email,
                         profilePicUrl: _profileController.userModel.value.profilePicUrl,
+                        role: role,
                       );
                       _profileController.updateUserData(updatedUser);
                       Get.back();

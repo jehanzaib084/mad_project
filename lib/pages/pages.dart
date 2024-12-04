@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:mad_project/authentication/model/user_model.dart';
 import 'package:mad_project/authentication/view/forgot_pass.dart';
 import 'package:mad_project/authentication/view/intro_screen.dart';
 import 'package:mad_project/authentication/view/login.dart';
@@ -17,6 +18,7 @@ class AppPages {
     GetPage(name: '/', page: () => Login()),
 
     // AUTHENTICATION SCREENS
+    GetPage(name: '/intro', page: () => const IntroScreen()),
     GetPage(name: '/login', page: () => Login()),
     GetPage(name: '/register', page: () => Register()),
     GetPage(name: '/registerProfile', page: () => ProfileUpdateScreen()),
@@ -27,13 +29,16 @@ class AppPages {
     GetPage(name: '/settings', page: () => SettingsList()),
     GetPage(name: '/profile', page: () => ProfileScreen()),
     GetPage(name: '/profileEdit', page: () => ProfileEdit(
-      uid: '', firstName: '', lastName: '', email: '', age: '', phoneNumber: '', profilePicUrl: ''
+      uid: '', firstName: '', lastName: '', email: '', age: '', phoneNumber: '', profilePicUrl: '', role: UserRole.values.firstWhere(
+      (e) => e.toString() == 'UserRole.${Get.parameters['role'] ?? 'student'}',
+      orElse: () => UserRole.student,
+    ),
     )),
 
     // ADDITIONAL SCREENS
     GetPage(name: '/faq_screen', page: () => FAQScreen()),
     GetPage(name: '/terms_screen', page: () => TermsScreen()),
     GetPage(name: '/about_screen', page: () => AboutScreen()),
-    GetPage(name: '/intro', page: () => const IntroScreen()),
+    
   ];
 }
