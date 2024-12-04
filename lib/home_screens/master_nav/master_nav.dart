@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mad_project/home_screens/posts_screens/view/favourite_posts.dart';
 import 'package:mad_project/home_screens/posts_screens/view/posts_list.dart';
-import 'package:mad_project/settings_screens/view/profile_crud/profile_view.dart';
-import 'package:mad_project/settings_screens/view/settings_list.dart';
+import 'package:mad_project/home_screens/settings_screens/view/profile_crud/profile_view.dart';
+import 'package:mad_project/home_screens/settings_screens/view/settings_list.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 class MasterNav extends StatelessWidget {

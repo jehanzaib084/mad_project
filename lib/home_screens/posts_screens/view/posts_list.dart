@@ -26,6 +26,12 @@ class PostsList extends StatelessWidget {
             },
           ),
           IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              // Handle search
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.filter_list),
             onPressed: () {
               // Handle filter
@@ -35,7 +41,7 @@ class PostsList extends StatelessWidget {
       ),
       body: Obx(() {
         if (postController.isLoading.value) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         } else if (postController.pagingController.itemList == null ||
             postController.pagingController.itemList!.isEmpty) {
           return Center(
@@ -50,16 +56,11 @@ class PostsList extends StatelessWidget {
             builderDelegate: PagedChildBuilderDelegate<Post>(
               itemBuilder: (context, post, index) => GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PostDetailView(
+                  Get.to(() => PostDetailView(
                         post: post,
                         isLoved: false,
                         onLoveToggle: () {},
-                      ),
-                    ),
-                  );
+                      ));
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -166,10 +167,10 @@ class PostsList extends StatelessWidget {
                   ),
                 ),
               ),
-              firstPageProgressIndicatorBuilder: (context) => Center(
+              firstPageProgressIndicatorBuilder: (context) => const Center(
                 child: CircularProgressIndicator(),
               ),
-              newPageProgressIndicatorBuilder: (context) => Center(
+              newPageProgressIndicatorBuilder: (context) => const Center(
                 child: CircularProgressIndicator(),
               ),
               firstPageErrorIndicatorBuilder: (context) => Center(
@@ -191,4 +192,3 @@ class PostsList extends StatelessWidget {
     );
   }
 }
-

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/authentication/model/user_model.dart';
-import 'package:mad_project/settings_screens/controller/profile_controller.dart';
+import 'package:mad_project/home_screens/settings_screens/controller/profile_controller.dart';
 
 class ProfileEdit extends StatelessWidget {
   final String uid;

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -12,6 +11,8 @@ class PostController extends GetxController {
   final PagingController<int, Post> pagingController = PagingController(firstPageKey: 0);
   final RxBool isLoading = false.obs;
   final RxList<Post> allPosts = <Post>[].obs;
+  final RxList<Post> filteredPosts = <Post>[].obs;
+  final RxList<String> selectedFilters = <String>[].obs;
 
   /// Create separate controllers for detail view and dialog
   final PageController detailPageController = PageController();
@@ -20,6 +21,7 @@ class PostController extends GetxController {
 
   final RxString phoneNumber = '+923054266700'.obs;
 
+  
   @override
   void onInit() {
     super.onInit();
@@ -53,6 +55,7 @@ class PostController extends GetxController {
       final List<dynamic> data = json.decode(response);
       final List<Post> newPosts = data.map((json) => Post.fromJson(json)).toList();
 
+      allPosts.addAll(newPosts);
       pagingController.appendPage(newPosts, pageKey + newPosts.length);
     } catch (e) {
       print('Error loading posts: $e');
@@ -61,6 +64,8 @@ class PostController extends GetxController {
       isLoading.value = false;
     }
   }
+
+ 
 
   Future<void> launchCall(String phoneNumber) async {
     final Uri callUri = Uri(

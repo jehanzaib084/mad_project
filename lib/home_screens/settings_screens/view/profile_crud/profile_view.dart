@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mad_project/settings_screens/controller/profile_controller.dart';
-import 'package:mad_project/settings_screens/view/profile_crud/profile_edit.dart';
+import 'package:mad_project/home_screens/settings_screens/controller/profile_controller.dart';
+import 'package:mad_project/home_screens/settings_screens/view/profile_crud/profile_edit.dart';
 import 'dart:convert';
 
 class ProfileScreen extends StatelessWidget {
