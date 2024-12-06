@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/assets.dart';
 import 'package:mad_project/authentication/controller/auth_controller.dart';
-import 'package:mad_project/authentication/model/user_model.dart';
 
 class Register extends StatelessWidget {
   Register({super.key});
@@ -12,10 +11,8 @@ class Register extends StatelessWidget {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  final AuthController _authController =
-      Get.find<AuthController>();
+  final AuthController _authController = Get.find<AuthController>();
   final RxBool isLoading = false.obs;
-  final RxString selectedRole = ''.obs;
 
   Future<void> _register(BuildContext context) async {
     // Hide keyboard
@@ -41,88 +38,12 @@ class Register extends StatelessWidget {
         Get.toNamed('registerProfile', parameters: {
           'email': _emailController.text,
           'password': _passwordController.text,
-          'role': selectedRole.value,
         });
       } finally {
         isLoading.value = false;
       }
     }
   }
-
-  Widget _buildRoleSelection() {
-    return Column(
-      children: [
-        const Text(
-          'Select Your Role',
-          style: TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-              color: Assets.primaryColor),
-        ),
-        const SizedBox(height: 10),
-        const Text(
-          'Are you a student or hostel owner?',
-          style: TextStyle(fontSize: 16, color: Assets.lightTextColor),
-        ),
-        const SizedBox(height: 50),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildRoleCard(
-              'Student',
-              Icons.school,
-              UserRole.student,
-            ),
-            _buildRoleCard(
-              'Hostel Owner',
-              Icons.business,
-              UserRole.owner,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRoleCard(String title, IconData icon, UserRole role) {
-    return Obx(() => GestureDetector(
-          onTap: () => selectedRole.value = role.toString(),
-          child: Container(
-            width: 150,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: selectedRole.value == role.toString()
-                  ? Assets.primaryColor.withOpacity(0.1)
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(
-                color: selectedRole.value == role.toString()
-                    ? Assets.primaryColor
-                    : Colors.grey.shade300,
-                width: 2,
-              ),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  icon,
-                  size: 50,
-                  color: Assets.primaryColor,
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ));
-  }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -138,10 +59,7 @@ class Register extends StatelessWidget {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Obx(
-                () => selectedRole.value.isEmpty
-                    ? _buildRoleSelection()
-                    : Form(
+              child: Form(
                         key: _formKey,
                         child: Column(
                           children: [
@@ -288,6 +206,6 @@ class Register extends StatelessWidget {
           ),
         ),
       ),
-    ));
+    );
   }
 }

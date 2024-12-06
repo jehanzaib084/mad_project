@@ -29,11 +29,8 @@ class AppPages {
     GetPage(name: '/settings', page: () => SettingsList()),
     GetPage(name: '/profile', page: () => ProfileScreen()),
     GetPage(name: '/profileEdit', page: () => ProfileEdit(
-      uid: '', firstName: '', lastName: '', email: '', age: '', phoneNumber: '', profilePicUrl: '', role: UserRole.values.firstWhere(
-      (e) => e.toString() == 'UserRole.${Get.parameters['role'] ?? 'student'}',
-      orElse: () => UserRole.student,
+      uid: '', firstName: '', lastName: '', email: '', age: '', phoneNumber: '', profilePicUrl: ''),
     ),
-    )),
 
     // ADDITIONAL SCREENS
     GetPage(name: '/faq_screen', page: () => FAQScreen()),

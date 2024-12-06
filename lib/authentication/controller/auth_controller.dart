@@ -22,7 +22,7 @@ class AuthController extends GetxController {
         email: email,
         password: 'temporary_password_123',
       );
-      
+
       // If we reach here, email doesn't exist
       return false;
     } on FirebaseAuthException catch (e) {
@@ -39,17 +39,24 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> signUp(String email, String password, UserModel userModel) async {
+  Future<void> signUp(
+      String email, String password, UserModel userModel) async {
     try {
       isLoading.value = true;
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       userModel.uid = userCredential.user!.uid;
-      await _firestore.collection('users').doc(userModel.uid).set(userModel.toMap());
+      await _firestore
+          .collection('users')
+          .doc(userModel.uid)
+          .set(userModel.toMap());
       await _saveUserDataToPreferences(userModel);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('hasSeenIntro', true);
     } on FirebaseAuthException catch (e) {
       Get.snackbar('Error', e.message ?? 'Sign up failed');
     } finally {
@@ -60,10 +67,17 @@ class AuthController extends GetxController {
   Future<void> signIn(String email, String password) async {
     try {
       isLoading.value = true;
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
-      DocumentSnapshot userDoc = await _firestore.collection('users').doc(userCredential.user!.uid).get();
-      UserModel userModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
+      DocumentSnapshot userDoc = await _firestore
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .get();
+      UserModel userModel =
+          UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
       await _saveUserDataToPreferences(userModel);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('hasSeenIntro', true);
     } on FirebaseAuthException catch (e) {
       Get.snackbar('Error', e.message ?? 'Login failed');
     } finally {
@@ -71,8 +85,8 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> completeProfile(String email, String password, String firstName, 
-      String lastName, int age, String phoneNumber, String role) async {
+  Future<void> completeProfile(String email, String password, String firstName,
+      String lastName, int age, String phoneNumber) async {
     UserModel userModel = UserModel(
       uid: '',
       firstName: firstName,
@@ -81,9 +95,6 @@ class AuthController extends GetxController {
       phoneNumber: phoneNumber,
       email: email,
       profilePicUrl: profileImageBase64.value,
-      role: UserRole.values.firstWhere(
-        (e) => e.toString() == role,
-      ),
     );
     await signUp(email, password, userModel);
   }
@@ -103,7 +114,6 @@ class AuthController extends GetxController {
     await prefs.setString('phoneNumber', userModel.phoneNumber);
     await prefs.setString('email', userModel.email);
     await prefs.setString('profilePicUrl', userModel.profilePicUrl);
-    await prefs.setString('role', userModel.role.toString().split('.').last);
   }
 
   String? validateEmail(String? value) {
@@ -148,10 +158,9 @@ class AuthController extends GetxController {
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
-      // Get.snackbar('Success', 'Password reset email sent');
+      Get.snackbar('Success', 'Password reset email sent');
     } on FirebaseAuthException catch (e) {
       Get.snackbar('Error', e.message ?? 'Failed to send password reset email');
     }
   }
-  
 }

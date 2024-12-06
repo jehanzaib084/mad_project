@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/assets.dart';
 import 'package:mad_project/authentication/controller/auth_controller.dart';
+import 'package:mad_project/authentication/view/forgot_pass.dart';
 
 class Login extends StatelessWidget {
   Login({super.key});
@@ -103,7 +104,7 @@ class Login extends StatelessWidget {
                         child: TextButton(
                           onPressed: () {
                             Future.delayed(Duration(milliseconds: 100), () {
-                              Get.toNamed('/forgot');
+                              Get.to( () => Forgot());
                             });
                           },
                           child: const Text(

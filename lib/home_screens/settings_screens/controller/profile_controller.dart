@@ -18,7 +18,6 @@ class ProfileController extends GetxController {
     phoneNumber: '',
     email: '',
     profilePicUrl: '',
-    role: UserRole.student,
   ).obs;
   var isLoading = false.obs;
 

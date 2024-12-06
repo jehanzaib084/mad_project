@@ -12,7 +12,6 @@ class ProfileEdit extends StatelessWidget {
   final String age;
   final String phoneNumber;
   final String profilePicUrl;
-  final UserRole role;
 
   ProfileEdit({
     super.key,
@@ -23,7 +22,6 @@ class ProfileEdit extends StatelessWidget {
     required this.age,
     required this.phoneNumber,
     required this.profilePicUrl,
-    required this.role,
   });
 
   final TextEditingController _firstNameController = TextEditingController();
@@ -151,7 +149,6 @@ class ProfileEdit extends StatelessWidget {
                         phoneNumber: _phoneNumberController.text,
                         email: email,
                         profilePicUrl: _profileController.userModel.value.profilePicUrl,
-                        role: role,
                       );
                       _profileController.updateUserData(updatedUser);
                       Get.back();

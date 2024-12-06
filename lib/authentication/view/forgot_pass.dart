@@ -19,7 +19,7 @@ class Forgot extends StatelessWidget {
       try {
         isLoading.value = true;
         await _authController.sendPasswordResetEmail(_emailController.text);
-        
+
         Get.defaultDialog(
           title: 'Success!',
           titlePadding: const EdgeInsets.only(top: 25.0),
@@ -86,96 +86,87 @@ class Forgot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          iconTheme: const IconThemeData(color: Colors.black),
-          leading: IconButton(
-            icon: const Padding(
-              padding: EdgeInsets.only(left: 6.0),
-              child: Icon(Icons.arrow_back),
-            ),
-            onPressed: () => Get.back(),
+    return Scaffold(
+      appBar: AppBar(
+        foregroundColor: Colors.black,
+        automaticallyImplyLeading: true,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(Assets.backgroundImage),
+            fit: BoxFit.cover,
           ),
         ),
-        body: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(Assets.backgroundImage),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Center(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Forgot Password',
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    const Text(
+                      'Forgot Password',
+                      style: TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Worry not we are here to help :)',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Assets.lightTextColor,
-                        ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Worry not we are here to help :)',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Assets.lightTextColor,
                       ),
-                      const SizedBox(height: 30),
-                      TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          labelText: 'Email',
-                          prefixIcon: const Icon(Icons.email_outlined),
+                    ),
+                    const SizedBox(height: 30),
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        validator: _authController.validateEmail,
+                        labelText: 'Email',
+                        prefixIcon: const Icon(Icons.email_outlined),
                       ),
-                      const SizedBox(height: 40),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: Obx(() => ElevatedButton(
-                          onPressed: isLoading.value 
-                              ? null 
-                              : () => _sendResetEmail(context),
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                      validator: _authController.validateEmail,
+                    ),
+                    const SizedBox(height: 40),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: Obx(() => ElevatedButton(
+                            onPressed: isLoading.value
+                                ? null
+                                : () => _sendResetEmail(context),
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              backgroundColor: Assets.btnBgColor,
                             ),
-                            backgroundColor: Assets.btnBgColor,
-                          ),
-                          child: isLoading.value
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
+                            child: isLoading.value
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor:
+                                          AlwaysStoppedAnimation<Color>(
+                                              Colors.white),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Send Reset Email',
+                                    style: TextStyle(
+                                        fontSize: 18, color: Colors.white),
                                   ),
-                                )
-                              : const Text(
-                                  'Send Reset Email',
-                                  style: TextStyle(
-                                      fontSize: 18, color: Colors.white),
-                                ),
-                        )),
-                      ),
-                    ],
-                  ),
+                          )),
+                    ),
+                  ],
                 ),
               ),
             ),

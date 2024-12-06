@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:mad_project/assets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class IntroScreen extends StatelessWidget {
   const IntroScreen({super.key});
 
   Future<void> _onIntroEnd() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('hasSeenIntro', true);
     Get.offAllNamed('/login');
   }
 
