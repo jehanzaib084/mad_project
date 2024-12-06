@@ -11,7 +11,7 @@ class Login extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthController _authController =
-      Get.find<AuthController>(); // Use Get.find to get the existing instance
+      Get.find<AuthController>();
 
   Future<void> _login(BuildContext context) async {
     if (_formKey.currentState!.validate()) {

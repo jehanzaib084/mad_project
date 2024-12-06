@@ -15,29 +15,29 @@ class AuthController extends GetxController {
 
   final RxBool isLoading = false.obs;
 
-  Future<bool> isEmailAlreadyExists(String email) async {
-    try {
-      // Create a dummy action code for checking
-      await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: 'temporary_password_123',
-      );
+  // Future<bool> isEmailAlreadyExists(String email) async {
+  //   try {
+  //     // Create a dummy action code for checking
+  //     await _auth.createUserWithEmailAndPassword(
+  //       email: email,
+  //       password: 'temporary_password_123',
+  //     );
 
-      // If we reach here, email doesn't exist
-      return false;
-    } on FirebaseAuthException catch (e) {
-      // Check specific error codes
-      if (e.code == 'email-already-in-use') {
-        return true;
-      }
-      // Handle other potential errors
-      print('Error checking email: ${e.message}');
-      return false;
-    } catch (e) {
-      print('Unexpected error checking email: $e');
-      return false;
-    }
-  }
+  //     // If we reach here, email doesn't exist
+  //     return false;
+  //   } on FirebaseAuthException catch (e) {
+  //     // Check specific error codes
+  //     if (e.code == 'email-already-in-use') {
+  //       return true;
+  //     }
+  //     // Handle other potential errors
+  //     print('Error checking email: ${e.message}');
+  //     return false;
+  //   } catch (e) {
+  //     print('Unexpected error checking email: $e');
+  //     return false;
+  //   }
+  // }
 
   Future<void> signUp(
       String email, String password, UserModel userModel) async {

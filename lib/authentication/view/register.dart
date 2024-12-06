@@ -23,16 +23,17 @@ class Register extends StatelessWidget {
         isLoading.value = true;
 
         // Check if email exists
-        final bool emailExists =
-            await _authController.isEmailAlreadyExists(_emailController.text);
+        // final bool emailExists =
+        //     await _authController.isEmailAlreadyExists(_emailController.text);
+        
 
-        if (emailExists) {
-          Get.snackbar(
-            'Error',
-            'This email is already registered. Please use a different email or try logging in.',
-          );
-          return;
-        }
+        // if (emailExists) {
+        //   Get.snackbar(
+        //     'Error',
+        //     'This email is already registered. Please use a different email or try logging in.',
+        //   );
+        //   return;
+        // }
 
         // If email doesn't exist, proceed to next page
         Get.toNamed('registerProfile', parameters: {
@@ -47,6 +48,7 @@ class Register extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      maintainBottomViewPadding: true,
         child: Scaffold(
       body: Container(
         decoration: BoxDecoration(
