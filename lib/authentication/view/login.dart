@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/assets.dart';
 import 'package:mad_project/authentication/controller/auth_controller.dart';
-import 'package:mad_project/authentication/view/forgot_pass.dart';
 
 class Login extends StatelessWidget {
   Login({super.key});
@@ -10,8 +9,7 @@ class Login extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthController _authController =
-      Get.find<AuthController>();
+  final AuthController _authController = Get.find<AuthController>();
 
   Future<void> _login(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
@@ -20,24 +18,22 @@ class Login extends StatelessWidget {
 
       await _authController.signIn(
           _emailController.text, _passwordController.text);
-
-      if (_authController.isLoading.value == false) {
-        Get.offAllNamed('/masterNav');
-      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(Assets.backgroundImage),
-              fit: BoxFit.cover,
-            ),
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      extendBody: true,
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(Assets.backgroundImage),
+            fit: BoxFit.cover,
           ),
+        ),
+        child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
               child: Padding(
@@ -104,7 +100,7 @@ class Login extends StatelessWidget {
                         child: TextButton(
                           onPressed: () {
                             Future.delayed(Duration(milliseconds: 100), () {
-                              Get.to( () => Forgot());
+                              Get.toNamed('/forgot');
                             });
                           },
                           child: const Text(

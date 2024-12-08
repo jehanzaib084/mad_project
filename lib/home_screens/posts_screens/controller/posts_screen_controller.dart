@@ -2,17 +2,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PostController extends GetxController {
-  static const int pageSize = 10;
-  final PagingController<int, Post> pagingController = PagingController(firstPageKey: 0);
   final RxBool isLoading = false.obs;
-  final RxList<Post> allPosts = <Post>[].obs;
+  final RxList<Post> allPosts = <Post>[].obs; // Observable list of posts
   final RxList<Post> filteredPosts = <Post>[].obs;
   final RxList<String> selectedFilters = <String>[].obs;
+  final RxString error = ''.obs;
 
   /// Create separate controllers for detail view and dialog
   final PageController detailPageController = PageController();
@@ -21,52 +19,65 @@ class PostController extends GetxController {
 
   final RxString phoneNumber = '+923054266700'.obs;
 
-  
   @override
   void onInit() {
     super.onInit();
-    initializeData();
+    initializeData(); // Load posts on initialization
   }
 
+  // Initialize data, load posts once
   Future<void> initializeData() async {
     try {
-      await loadPosts(0);
+      await loadPosts();  // Load posts directly, no pagination needed
     } catch (e) {
-      print('Error initializing data: $e');
+      Get.snackbar('Error initializing data: $e', 'We are very sorry');
     }
   }
 
+  // Load posts from the local file (no pagination logic needed)
+  Future<void> loadPosts() async {
+    try {
+      isLoading.value = true;
+      error.value = '';
+      
+      final String response = await rootBundle.loadString('assets/dummy_posts.json');
+      final List<dynamic> data = json.decode(response);
+      final List<Post> newPosts = data.map((json) => Post.fromJson(json)).toList();
+      
+      allPosts.clear(); // Clear existing posts
+      allPosts.addAll(newPosts);
+    } catch (e) {
+      error.value = 'Failed to load posts: $e';
+      Get.snackbar(
+        'Error',
+        'Failed to load posts',
+        backgroundColor: Colors.red[100],
+        colorText: Colors.red[900],
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Getter for the number of posts
+  int get postCount => allPosts.length;
+
+  // Getter for the list of posts
+  List<Post> get posts => allPosts;
+
+  // Change the page view when page changes
   void onPageChanged(int index) {
     currentPage.value = index;
   }
 
+  // Synchronize two page controllers
   void syncPageControllers(int index) {
     currentPage.value = index;
     detailPageController.jumpToPage(index);
     dialogPageController.jumpToPage(index);
   }
 
-  Future<void> loadPosts(int pageKey) async {
-    if (isLoading.value) return;
-    
-    try {
-      isLoading.value = true;
-      final String response = await rootBundle.loadString('assets/dummy_posts.json');
-      final List<dynamic> data = json.decode(response);
-      final List<Post> newPosts = data.map((json) => Post.fromJson(json)).toList();
-
-      allPosts.addAll(newPosts);
-      pagingController.appendPage(newPosts, pageKey + newPosts.length);
-    } catch (e) {
-      print('Error loading posts: $e');
-      pagingController.error = e;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
- 
-
+  // Launch a call
   Future<void> launchCall(String phoneNumber) async {
     final Uri callUri = Uri(
       scheme: 'tel',
@@ -95,6 +106,7 @@ class PostController extends GetxController {
     }
   }
 
+  // Launch WhatsApp
   Future<void> launchWhatsApp(String phoneNumber) async {
     final Uri whatsappUri = Uri.parse(
         'https://wa.me/$phoneNumber?text=Hello, I am interested in your property');
@@ -119,7 +131,6 @@ class PostController extends GetxController {
   void dispose() {
     detailPageController.dispose();
     dialogPageController.dispose();
-    pagingController.dispose();
     super.dispose();
   }
 }

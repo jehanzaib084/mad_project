@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:mad_project/authentication/model/user_model.dart';
 import 'package:mad_project/authentication/view/forgot_pass.dart';
 import 'package:mad_project/authentication/view/intro_screen.dart';
 import 'package:mad_project/authentication/view/login.dart';

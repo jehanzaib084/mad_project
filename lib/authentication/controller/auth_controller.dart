@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mad_project/assets.dart';
 import 'package:mad_project/authentication/model/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,29 +18,59 @@ class AuthController extends GetxController {
 
   final RxBool isLoading = false.obs;
 
-  // Future<bool> isEmailAlreadyExists(String email) async {
-  //   try {
-  //     // Create a dummy action code for checking
-  //     await _auth.createUserWithEmailAndPassword(
-  //       email: email,
-  //       password: 'temporary_password_123',
-  //     );
+  final RxInt resendTimer = 60.obs;
+  final RxBool canResendEmail = true.obs;
+  Timer? _timer;
 
-  //     // If we reach here, email doesn't exist
-  //     return false;
-  //   } on FirebaseAuthException catch (e) {
-  //     // Check specific error codes
-  //     if (e.code == 'email-already-in-use') {
-  //       return true;
-  //     }
-  //     // Handle other potential errors
-  //     print('Error checking email: ${e.message}');
-  //     return false;
-  //   } catch (e) {
-  //     print('Unexpected error checking email: $e');
-  //     return false;
-  //   }
-  // }
+  Future<void> startResendTimer() async {
+    canResendEmail.value = false;
+    resendTimer.value = 60;
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (resendTimer.value > 0) {
+        resendTimer.value--;
+      } else {
+        canResendEmail.value = true;
+        timer.cancel();
+      }
+    });
+  }
+
+  Future<void> sendEmailVerification() async {
+    try {
+      await _auth.currentUser?.sendEmailVerification();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to send verification email');
+    }
+  }
+
+  Future<bool> checkEmailVerified() async {
+    await _auth.currentUser?.reload();
+    return _auth.currentUser?.emailVerified ?? false;
+  }
+
+  Future<void> deleteUnverifiedUser() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        // Delete from Firestore first
+        await _firestore.collection('users').doc(user.uid).delete();
+        // Then delete auth user
+        await user.delete();
+
+        // Clear stored data
+        profileImageBase64.value = '';
+
+        Get.snackbar(
+          'Account Deleted',
+          'Your unverified account has been deleted. Please register again.',
+          backgroundColor: Colors.blue[100],
+        );
+      }
+    } catch (e) {
+      print('Error deleting unverified user: $e');
+    }
+  }
 
   Future<void> signUp(
       String email, String password, UserModel userModel) async {
@@ -68,16 +101,32 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
+        email: email,
+        password: password,
+      );
+
+      // Check if email is verified
+      if (!userCredential.user!.emailVerified) {
+        Get.snackbar(
+          'Error',
+          'Please verify your email first',
+          backgroundColor: Colors.red[100],
+          colorText: Colors.red[900],
+        );
+        await sendEmailVerification();
+        return;
+      }
+
       DocumentSnapshot userDoc = await _firestore
           .collection('users')
           .doc(userCredential.user!.uid)
           .get();
+
       UserModel userModel =
           UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
       await _saveUserDataToPreferences(userModel);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('hasSeenIntro', true);
+
+      Get.offAllNamed('/masterNav');
     } on FirebaseAuthException catch (e) {
       Get.snackbar('Error', e.message ?? 'Login failed');
     } finally {
@@ -85,6 +134,7 @@ class AuthController extends GetxController {
     }
   }
 
+  // Modify completeProfile method
   Future<void> completeProfile(String email, String password, String firstName,
       String lastName, int age, String phoneNumber) async {
     UserModel userModel = UserModel(
@@ -96,7 +146,107 @@ class AuthController extends GetxController {
       email: email,
       profilePicUrl: profileImageBase64.value,
     );
+
     await signUp(email, password, userModel);
+
+    // Send verification email
+    await sendEmailVerification();
+
+    // Show verification dialog
+    Get.dialog(
+      PopScope(
+        canPop: false,
+        child: AlertDialog(
+          title: const Text('Verify Your Email'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.mark_email_unread_outlined,
+                size: 50,
+                color: Assets.primaryColor,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'A verification link has been sent to your email.\n'
+                'Please verify your email to continue.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 20),
+              Obx(() => Text(
+                    canResendEmail.value
+                        ? 'You can resend the verification email'
+                        : 'Resend available in ${resendTimer.value}s',
+                    style: TextStyle(color: Assets.lightTextColor),
+                  )),
+            ],
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: Obx(() => ElevatedButton(
+                        onPressed: canResendEmail.value
+                            ? () async {
+                                await sendEmailVerification();
+                                startResendTimer();
+                                Get.snackbar(
+                                  'Success',
+                                  'Verification email sent again',
+                                  backgroundColor: Colors.green[100],
+                                );
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Assets.btnBgColor,
+                        ),
+                        child: Text(
+                          'Resend Email',
+                          style: TextStyle(
+                            color: canResendEmail.value
+                                ? Colors.white
+                                : Colors.grey,
+                          ),
+                        ),
+                      )),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await deleteUnverifiedUser();
+                      Get.back();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    child: const Text(
+                      'Close',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      barrierDismissible: false,
+    );
+
+    // Start verification check loop
+    bool isVerified = false;
+    while (!isVerified) {
+      await Future.delayed(const Duration(seconds: 3));
+      isVerified = await checkEmailVerified();
+
+      if (isVerified) {
+        Get.back(); // Close dialog
+        Get.offAllNamed('/masterNav');
+      }
+    }
   }
 
   Future<void> signOut() async {
@@ -162,5 +312,11 @@ class AuthController extends GetxController {
     } on FirebaseAuthException catch (e) {
       Get.snackbar('Error', e.message ?? 'Failed to send password reset email');
     }
+  }
+
+  @override
+  void onClose() {
+    _timer?.cancel();
+    super.onClose();
   }
 }
