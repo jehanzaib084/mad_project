@@ -22,7 +22,6 @@ class Post {
   final List<Review> reviews;
   final String wifiDetails;
   final String mealDetails;
-  final String gender; // "boys" or "girls"
 
   Post({
     required this.id,
@@ -46,7 +45,6 @@ class Post {
     required this.reviews,
     required this.wifiDetails,
     required this.mealDetails,
-    required this.gender,
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
@@ -73,7 +71,6 @@ class Post {
       reviews: (json['reviews'] as List?)?.map((review) => Review.fromJson(review)).toList() ?? [],
       wifiDetails: json['wifiDetails']?.toString() ?? 'Not available',
       mealDetails: json['mealDetails']?.toString() ?? 'Not included',
-      gender: json['gender']?.toString() ?? 'boys',
     );
   }
 
@@ -100,7 +97,6 @@ class Post {
       'reviews': reviews.map((review) => review.toJson()).toList(),
       'wifiDetails': wifiDetails,
       'mealDetails': mealDetails,
-      'gender': gender,
     };
   }
 }

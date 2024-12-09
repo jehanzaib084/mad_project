@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/assets.dart';
-import 'package:mad_project/home_screens/crud_post_screens/view/create_post.dart';
-import 'package:mad_project/home_screens/crud_post_screens/view/my_posts.dart';
 import 'package:mad_project/home_screens/master_nav/controller/master_nav_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/view/favourite_posts.dart';
 import 'package:mad_project/home_screens/posts_screens/view/posts_list.dart';
@@ -17,8 +15,8 @@ class MasterNav extends StatelessWidget {
     final List<Widget> screens = [
       PostsList(),
       FavoritePostsScreen(),
-      CreatePostScreen(),
-      MyPostsScreen(),
+      Center(child: Text('Create Post Screen')),
+      Center(child: Text('My Posts Screen')),
       SettingsList(),
     ];
 

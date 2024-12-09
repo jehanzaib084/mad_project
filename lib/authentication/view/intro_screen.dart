@@ -17,12 +17,12 @@ class IntroScreen extends StatelessWidget {
       extendBody: true,
       
       body: Container(
-        // decoration: BoxDecoration(
-        //   image: DecorationImage(
-        //     image: AssetImage(Assets.backgroundImage),
-        //     fit: BoxFit.cover,
-        //   ),
-        // ),
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(Assets.backgroundImage),
+            fit: BoxFit.cover,
+          ),
+        ),
         child: SafeArea(
           child: IntroductionScreen(
             pages: [

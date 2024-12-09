@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mad_project/assets.dart';
 import 'package:mad_project/home_screens/settings_screens/controller/profile_controller.dart';
 
 class SettingsList extends StatelessWidget {
@@ -25,43 +24,21 @@ class SettingsList extends StatelessWidget {
           return Column(
             children: [
               Center(
-                child: Container(
-                  padding: const EdgeInsets.all(16.0),
-                  margin: const EdgeInsets.symmetric(vertical: 16.0),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.black.withOpacity(0.2),
-                    ),
-                  ),
-                  child: ClipOval(
-                    child: CircleAvatar(
+                child: Stack(
+                  children: [
+                    CircleAvatar(
                       radius: 50,
-                      backgroundColor: Colors.transparent,
-                      child: profileController
-                              .userModel.value.profilePicUrl.isNotEmpty
-                          ? Image.memory(
-                              base64Decode(profileController
-                                  .userModel.value.profilePicUrl),
-                              fit: BoxFit.cover,
-                              width: 200,
-                              height: 200,
-                            )
-                          : Image.asset(
-                              Assets.dummyProfilePic,
-                              fit: BoxFit.cover,
-                              width: 200,
-                              height: 200,
-                            ),
+                      backgroundImage: profileController.userModel.value.profilePicUrl.isNotEmpty
+                          ? MemoryImage(base64Decode(profileController.userModel.value.profilePicUrl))
+                          : const AssetImage('assets/bg_images/bg2.jpg') as ImageProvider,
                     ),
-                  ),
+                  ],
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 '${profileController.userModel.value.firstName} ${profileController.userModel.value.lastName}',
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildProfileOption(context, '👤 Profile', () {
@@ -107,8 +84,7 @@ class SettingsList extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileOption(
-      BuildContext context, String title, VoidCallback onTap) {
+  Widget _buildProfileOption(BuildContext context, String title, VoidCallback onTap) {
     return ListTile(
       title: Text(title),
       trailing: const Icon(Icons.arrow_forward_ios),
