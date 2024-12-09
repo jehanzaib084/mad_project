@@ -17,9 +17,9 @@ class FavoritePostsScreen extends StatelessWidget {
         title: const Text('Favorite Posts'),
       ),
       body: Container(
-        decoration: BoxDecoration(
-          color: Colors.pink,
-        ),
+        // decoration: const BoxDecoration(
+        //   color: Color((0xFFA6CCED)),
+        // ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Obx(() {

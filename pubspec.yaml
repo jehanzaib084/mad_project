@@ -25,6 +25,7 @@ dependencies:
   introduction_screen: ^3.1.14
   google_maps_flutter: ^2.5.0
   location: ^5.0.3
+  flex_color_scheme: ^8.0.2
 
 dev_dependencies:
   flutter_test:
@@ -38,4 +39,5 @@ flutter:
   assets:
     - assets/bg_images/
     - assets/intro_images/
+    - assets/profile_pic/
     - assets/

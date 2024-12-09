@@ -33,24 +33,24 @@ class PostsList extends StatelessWidget {
         ],
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.pink,
-        ),
+        // decoration: const BoxDecoration(
+        //   color: Color((0xFFA6CCED)),
+        // ),
         child: RefreshIndicator(
           onRefresh: postController.loadPosts,
           child: Obx(() {
             if (postController.isLoading.value) {
               return _buildLoadingShimmer();
             }
-        
+
             if (postController.error.value.isNotEmpty) {
               return _buildErrorView(postController.error.value);
             }
-        
+
             if (postController.allPosts.isEmpty) {
               return _buildEmptyView();
             }
-        
+
             return _buildPostsList();
           }),
         ),
@@ -122,106 +122,106 @@ class PostsList extends StatelessWidget {
   }
 
   Widget _buildPostImage(Post post) {
-  return Stack(
-    children: [
-      ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-        child: CachedNetworkImage(
-          imageUrl: post.images.first,
-          height: 200,
-          width: double.infinity,
-          fit: BoxFit.cover,
-          placeholder: (context, url) => Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Container(
-              height: 200,
-              color: Colors.white,
-            ),
-          ),
-          errorWidget: (context, url, error) => Container(
-            height: 200,
-            color: Colors.grey[300],
-            child: const Icon(Icons.error),
-          ),
-        ),
-      ),
-      // Add favorite button overlay
-      Positioned(
-        top: 8,
-        right: 8,
-        child: GetX<FavoriteController>(
-          builder: (controller) => CircleAvatar(
-            backgroundColor: Colors.white,
-            child: IconButton(
-              icon: Icon(
-                controller.isFavorite(post.id) 
-                    ? Icons.favorite 
-                    : Icons.favorite_border,
-                color: controller.isFavorite(post.id) 
-                    ? Colors.red 
-                    : Colors.black,
-              ),
-              onPressed: () => controller.toggleFavorite(post),
-            ),
-          ),
-        ),
-      ),
-    ],
-  );
-}
-
-Widget _buildPostDetails(Post post) {
-  return Padding(
-    padding: const EdgeInsets.all(12.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Stack(
       children: [
-        Text(
-          post.propertyName,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            const Icon(Icons.location_on, size: 16, color: Colors.grey),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Text(
-                post.location,
-                style: const TextStyle(color: Colors.grey),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+        ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+          child: CachedNetworkImage(
+            imageUrl: post.images.first,
+            height: 200,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                height: 200,
+                color: Colors.white,
               ),
             ),
-          ],
+            errorWidget: (context, url, error) => Container(
+              height: 200,
+              color: Colors.grey[300],
+              child: const Icon(Icons.error),
+            ),
+          ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          'Rs. ${post.price}',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.blue,
+        // Add favorite button overlay
+        Positioned(
+          top: 8,
+          right: 8,
+          child: GetX<FavoriteController>(
+            builder: (controller) => CircleAvatar(
+              backgroundColor: Colors.white,
+              child: IconButton(
+                icon: Icon(
+                  controller.isFavorite(post.id)
+                      ? Icons.favorite
+                      : Icons.favorite_border,
+                  color: controller.isFavorite(post.id)
+                      ? Colors.red
+                      : Colors.black,
+                ),
+                onPressed: () => controller.toggleFavorite(post),
+              ),
+            ),
           ),
         ),
       ],
-    ),
-  );
-}
+    );
+  }
+
+  Widget _buildPostDetails(Post post) {
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            post.propertyName,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.location_on, size: 16, color: Colors.grey),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  post.location,
+                  style: const TextStyle(color: Colors.grey),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Rs. ${post.price}',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildPostCard(Post post) {
     return GestureDetector(
       onTap: () => Get.to(() => PostDetailView(
-        post: post,
-        isLoved: false,
-        onLoveToggle: () {},
-      )),
+            post: post,
+            isLoved: false,
+            onLoveToggle: () {},
+          )),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Card(
