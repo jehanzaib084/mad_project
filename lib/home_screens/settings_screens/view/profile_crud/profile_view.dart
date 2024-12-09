@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mad_project/assets.dart';
 import 'package:mad_project/home_screens/settings_screens/controller/profile_controller.dart';
 import 'package:mad_project/home_screens/settings_screens/view/profile_crud/profile_edit.dart';
 import 'dart:convert';
 
+// In profile_view.dart
 class ProfileScreen extends StatelessWidget {
   final ProfileController _profileController = Get.put(ProfileController());
 
@@ -12,64 +14,77 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        title: Text('Personal Information'),
+        title: const Text('Personal Information'),
       ),
-      body: Center(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              child: Padding(
+      body: Container(
+        decoration: BoxDecoration(
+          color: Assets.primaryColor.withOpacity(0.1),
+        ),
+        child: Center(
+          child: Stack(
+            children: [
+              SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Obx(() {
                   final user = _profileController.userModel.value;
                   return Column(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center,
                     children: [
+                      // Profile Picture
                       Center(
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundColor: Colors.transparent,
-                          backgroundImage: user.profilePicUrl.isNotEmpty
-                              ? MemoryImage(base64Decode(user.profilePicUrl))
-                              : null,
-                          child: user.profilePicUrl.isEmpty
-                              ? const Icon(
-                                  Icons.person,
-                                  size: 50,
-                                  color: Colors.grey,
-                                )
-                              : null,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Padding(
+                        child: Container(
                           padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildProfileInfo('First Name', user.firstName),
-                              _buildProfileInfo('Last Name', user.lastName),
-                              _buildProfileInfo('Email', user.email),
-                              _buildProfileInfo('Age', user.age.toString()),
-                              _buildProfileInfo(
-                                  'Phone Number', user.phoneNumber),
-                            ],
+                          margin: const EdgeInsets.symmetric(vertical: 16.0),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.black.withOpacity(0.2),
+                            ),
+                          ),
+                          child: ClipOval(
+                            child: CircleAvatar(
+                              radius: 70,
+                              backgroundColor: Colors.transparent,
+                              child: user.profilePicUrl.isNotEmpty
+                                  ? Image.memory(
+                                      base64Decode(user.profilePicUrl),
+                                      fit: BoxFit.cover,
+                                      width: 200, // 2x radius
+                                      height: 200,
+                                    )
+                                  : Image.asset(
+                                      Assets.dummyProfilePic,
+                                      fit: BoxFit.cover,
+                                      width: 200,
+                                      height: 200,
+                                    ),
+                            ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 56), // Increased spacing
+
+                      // User Name
+                      Text(
+                        "${user.firstName} ${user.lastName}",
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Divider(height: 32.0),
+
+                      // Info Cards
+                      Info(infoKey: "First Name", info: user.firstName),
+                      Info(infoKey: "Last Name", info: user.lastName),
+                      Info(infoKey: "Age", info: user.age.toString()),
+                      Info(infoKey: "Phone", info: user.phoneNumber),
+                      Info(infoKey: "Email", info: user.email),
+
+                      const SizedBox(height: 32),
+
+                      // Keep existing update profile button
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -89,7 +104,7 @@ class ProfileScreen extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            backgroundColor: Colors.blue,
+                            backgroundColor: Assets.btnBgColor,
                           ),
                           child: const Text(
                             'Update Profile',
@@ -101,36 +116,76 @@ class ProfileScreen extends StatelessWidget {
                   );
                 }),
               ),
-            ),
-            // Loading overlay remains the same
-            Obx(() {
-              if (_profileController.isLoading.value) {
-                return Container(
-                  color: Colors.black.withOpacity(0.5),
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              } else {
-                return const SizedBox.shrink();
-              }
-            }),
-          ],
+              // Loading overlay
+              Obx(() {
+                if (_profileController.isLoading.value) {
+                  return Container(
+                    color: Colors.black.withOpacity(0.5),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
+              }),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildProfileInfo(String label, String value) {
+class Info extends StatelessWidget {
+  final String infoKey;
+  final String info;
+
+  const Info({
+    super.key,
+    required this.infoKey,
+    required this.info,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Special case for email to allow wrapping
+    final bool isEmail = infoKey == "Email";
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment:
+            isEmail ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
           Text(
-            '$label: ',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            infoKey,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 16,
+            ),
           ),
-          Text(value),
+          if (isEmail)
+            Expanded(
+              child: Text(
+                info,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.right,
+                softWrap: true,
+              ),
+            )
+          else
+            Text(
+              info,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
         ],
       ),
     );
