@@ -56,7 +56,7 @@ class FavoritePostsScreen extends StatelessWidget {
                         Stack(
                           children: [
                             CachedNetworkImage(
-                              imageUrl: post.image,
+                              imageUrl: post.images.first,
                               imageBuilder: (context, imageProvider) => Container(
                                 height: 200,
                                 decoration: BoxDecoration(

@@ -3,9 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:mad_project/assets.dart';
 import 'package:mad_project/authentication/controller/auth_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/controller/favorite_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,66 +33,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      // theme: ThemeData(
-      //   brightness: Brightness.light,
-      //   appBarTheme: const AppBarTheme(
-      //     systemOverlayStyle: SystemUiOverlayStyle(
-      //       statusBarColor: Colors.transparent,
-      //       statusBarIconBrightness: Brightness.dark,
-      //     ),
-      //     backgroundColor: Colors.transparent,
-      //     elevation: 0,
-      //     iconTheme: IconThemeData(color: Colors.black),
-      //     titleTextStyle: TextStyle(
-      //       color: Colors.black,
-      //       fontSize: 20,
-      //       fontWeight: FontWeight.bold,
-      //     ),
-      //   ),
-      //   textTheme: TextTheme(
-      //     titleLarge: TextStyle(
-      //       fontSize: 20.0,
-      //       fontWeight: FontWeight.bold,
-      //       color: Assets.primaryColor,
-      //     ),
-      //   ),
-      //   elevatedButtonTheme: ElevatedButtonThemeData(
-      //     style: ElevatedButton.styleFrom(
-      //       backgroundColor: Assets.btnBgColor,
-      //       shape: RoundedRectangleBorder(
-      //         borderRadius: BorderRadius.circular(10),
-      //       ),
-      //     ),
-      //   ),
-      //   inputDecorationTheme: InputDecorationTheme(
-      //     focusedBorder: OutlineInputBorder(
-      //       borderSide: BorderSide(color: Assets.focusedBorderColor),
-      //       borderRadius: BorderRadius.circular(10),
-      //     ),
-      //     border: OutlineInputBorder(
-      //       borderRadius: BorderRadius.circular(10),
-      //     ),
-      //     labelStyle: TextStyle(color: Assets.focusedBorderColor),
-      //     hintStyle: TextStyle(color: Assets.focusedBorderColor),
-      //   ),
-      // ),
-      // darkTheme: ThemeData(
-      //   brightness: Brightness.dark,
-      //   appBarTheme: const AppBarTheme(
-      //     systemOverlayStyle: SystemUiOverlayStyle(
-      //       statusBarColor: Colors.transparent,
-      //       statusBarIconBrightness: Brightness.light,
-      //     ),
-      //     backgroundColor: Colors.transparent,
-      //     elevation: 0,
-      //     iconTheme: IconThemeData(color: Colors.white),
-      //     titleTextStyle: TextStyle(
-      //       color: Colors.white,
-      //       fontSize: 20,
-      //       fontWeight: FontWeight.bold,
-      //     ),
-      //   ),
-      // ),
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,

@@ -4,6 +4,7 @@ import 'package:mad_project/authentication/view/intro_screen.dart';
 import 'package:mad_project/authentication/view/login.dart';
 import 'package:mad_project/authentication/view/register.dart';
 import 'package:mad_project/authentication/view/register_profile.dart';
+import 'package:mad_project/home_screens/crud_post_screens/view/create_post.dart';
 import 'package:mad_project/home_screens/crud_post_screens/view/my_posts.dart';
 import 'package:mad_project/home_screens/settings_screens/view/faqs_screen.dart';
 import 'package:mad_project/home_screens/settings_screens/view/profile_crud/profile_view.dart';
@@ -40,5 +41,6 @@ class AppPages {
 
     // POST CREATIION RELATED SCREENS
     GetPage(name: '/my_posts', page: () => MyPostsScreen()),
+    GetPage(name: '/create_post', page: () => CreatePostScreen()),
   ];
 }

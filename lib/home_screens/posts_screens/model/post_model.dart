@@ -1,3 +1,4 @@
+// post_model.dart
 import 'package:mad_project/home_screens/posts_screens/model/review_model.dart';
 
 class Post {
@@ -5,7 +6,6 @@ class Post {
   final String propertyName;
   final String propertyType;
   final String description;
-  final String image;
   final List<String> images;
   final String garage;
   final String light;
@@ -22,14 +22,13 @@ class Post {
   final List<Review> reviews;
   final String wifiDetails;
   final String mealDetails;
-  final String gender; // "boys" or "girls"
+  final String gender;
 
   Post({
     required this.id,
     required this.propertyName,
     required this.propertyType,
     required this.description,
-    required this.image,
     required this.images,
     required this.garage,
     required this.light,
@@ -55,9 +54,7 @@ class Post {
       propertyName: json['propertyName']?.toString() ?? '',
       propertyType: json['propertyType']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
-      image: json['image']?.toString() ?? '',
-      images: (json['images'] as List?)?.map((e) => e.toString()).toList() ?? 
-             [json['image']?.toString() ?? ''],
+      images: (json['images'] as List?)?.map((e) => e.toString()).toList() ?? [],
       garage: json['garage']?.toString() ?? 'No',
       light: json['light']?.toString() ?? 'No',
       water: json['water']?.toString() ?? 'No',
@@ -83,7 +80,6 @@ class Post {
       'propertyName': propertyName,
       'propertyType': propertyType,
       'description': description,
-      'image': image,
       'images': images,
       'garage': garage,
       'light': light,
