@@ -1,9 +1,14 @@
 // import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+enum PostFilter { recent, popular, nearby }
 
 class PostController extends GetxController {
   final RxBool isLoading = false.obs;
@@ -18,19 +23,49 @@ class PostController extends GetxController {
   final PageController dialogPageController = PageController();
   final RxInt currentPage = 0.obs;
 
-  final int pageSize = 100;
+  final int pageSize = 2;
   DocumentSnapshot? lastDocument;
 
-  @override
+  final Rx<PostFilter> currentFilter = PostFilter.recent.obs;
+  final RxString currentCity = ''.obs;
+  final RxMap<String, bool> additionalFilters = <String, bool>{}.obs;
+  final RxString ratingSort = ''.obs; // 'asc' or 'desc'
+
+  final RxMap<String, bool> dialogFilters = <String, bool>{
+    'wifi': false,
+    'kitchen': false,
+    'garage': false,
+    'water': false,
+    'light': false,
+  }.obs;
+
+  final Rx<String> priceSort = ''.obs; // 'asc', 'desc', or ''
+
+  bool get hasActiveDialogFilters =>
+      dialogFilters.values.any((v) => v) || priceSort.value.isNotEmpty;
+
+  @override 
   void onInit() {
     super.onInit();
-    initializeData(); // Load posts on initialization
+    currentCity.value = 'Lahore'; // Set default
+    setupLocationListener();
+    getCurrentLocation();
+    initializeData();
+  }
+
+  void setupLocationListener() {
+    // Listen to location service status changes
+    Geolocator.getServiceStatusStream().listen((ServiceStatus status) {
+      if (status == ServiceStatus.enabled) {
+        getCurrentLocation();
+      }
+    });
   }
 
   // Initialize data, load posts once
   Future<void> initializeData() async {
     try {
-      await loadPosts();  // Load posts directly, no pagination needed
+      await loadPosts(); // Load posts directly, no pagination needed
     } catch (e) {
       Get.snackbar('Error initializing data: $e', 'We are very sorry');
     }
@@ -50,16 +85,42 @@ class PostController extends GetxController {
       isLoading.value = true;
       error.value = '';
 
-      Query query = FirebaseFirestore.instance
-          .collection('posts')
-          .orderBy('createdAt', descending: true)
-          .limit(pageSize);
+      Query query = FirebaseFirestore.instance.collection('posts');
 
+      // Apply base query based on active filter type
+      if (hasActiveDialogFilters) {
+        // Apply dialog filters
+        if (priceSort.value.isNotEmpty) {
+          query = query.orderBy('price', descending: priceSort.value == 'desc');
+        }
+
+        // Apply facility filters
+        dialogFilters.forEach((facility, isEnabled) {
+          if (isEnabled) {
+            query = query.where(facility, isEqualTo: true);
+          }
+        });
+      } else {
+        // Apply tab filters
+        switch (currentFilter.value) {
+          case PostFilter.recent:
+            query = query.orderBy('createdAt', descending: true);
+            break;
+          case PostFilter.popular:
+            query = query.orderBy('views', descending: true);
+            break;
+          case PostFilter.nearby:
+            // TODO: Handle this case.
+        }
+      }
+
+      query = query.limit(pageSize);
       if (lastDocument != null) {
         query = query.startAfterDocument(lastDocument!);
       }
 
       final querySnapshot = await query.get();
+
       final List<Post> newPosts = querySnapshot.docs.map((doc) {
         return Post.fromJson(doc.data() as Map<String, dynamic>);
       }).toList();
@@ -72,15 +133,10 @@ class PostController extends GetxController {
       }
     } catch (e) {
       error.value = 'Failed to load posts: $e';
-      Get.snackbar(
-        'Error',
-        'Failed to load posts',
-        backgroundColor: Colors.red[100],
-        colorText: Colors.red[900],
-      );
+      Get.snackbar('Error', 'Failed to load posts');
     } finally {
       isLoading.value = false;
-      update(); // Update the controller to refresh the UI
+      update();
     }
   }
 
@@ -112,6 +168,75 @@ class PostController extends GetxController {
     dialogPageController.jumpToPage(index);
   }
 
+  Future<void> incrementPostView(Post post) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // Don't increment if user already viewed or is post owner
+    if (post.viewedBy.contains(user.uid) || post.userId == user.uid) return;
+
+    try {
+      await FirebaseFirestore.instance.collection('posts').doc(post.id).update({
+        'views': FieldValue.increment(1),
+        'viewedBy': FieldValue.arrayUnion([user.uid])
+      });
+    } catch (e) {
+      print('Error incrementing view: $e');
+    }
+  }
+
+  void clearAllFilters() {
+    dialogFilters.updateAll((key, value) => false);
+    priceSort.value = '';
+    currentFilter.value = PostFilter.recent;
+    refreshPosts();
+  }
+
+  Future<void> getCurrentLocation() async {
+    try {
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        final requestPermission = await Geolocator.requestPermission();
+        if (requestPermission == LocationPermission.denied) {
+          return; // Keep default 'Lahore'
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        return; // Keep default 'Lahore'
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+      
+      if (placemarks.isNotEmpty) {
+        currentCity.value = placemarks.first.locality ?? 'Lahore';
+      }
+    } catch (e) {
+      print('Location error: $e');
+      // Keep default 'Lahore' on error
+    }
+  }
+
+  void applyDialogFilters() {
+    currentFilter.value = PostFilter.recent;
+    refreshPosts();
+  }
+
+  void changeFilter(PostFilter filter) {
+    // Clear dialog filters when changing tab filters
+    dialogFilters.updateAll((key, value) => false);
+    priceSort.value = '';
+
+    if (currentFilter.value != filter) {
+      currentFilter.value = filter;
+      refreshPosts();
+    }
+  }
+
   // Launch a call
   Future<void> launchCall(String phoneNumber) async {
     final Uri callUri = Uri(
@@ -123,7 +248,7 @@ class PostController extends GetxController {
         await launchUrl(callUri);
       } else {
         Get.snackbar(
-          'Error', 
+          'Error',
           'Could not launch Call',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red.withOpacity(0.5),
@@ -132,7 +257,7 @@ class PostController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Error', 
+        'Error',
         'Failed to make call: ${e.toString()}',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red.withOpacity(0.5),
@@ -142,25 +267,48 @@ class PostController extends GetxController {
   }
 
   // Launch WhatsApp
-  Future<void> launchWhatsApp(String phoneNumber) async {
-    final Uri whatsappUri = Uri.parse(
-        'https://wa.me/$phoneNumber?text=Hello, I am interested in your property');
-    try {
-      if (await canLaunchUrl(whatsappUri)) {
-        await launchUrl(whatsappUri);
-      } else {
-        Get.snackbar(
-          'Error', 
-          'Could not launch WhatsApp',
-        );
-      }
-    } catch (e) {
+  // Update launchWhatsApp method in PostController
+Future<void> launchWhatsApp(String phoneNumber) async {
+  // Format phone number (remove any spaces or special characters)
+  final formattedNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+  
+  // Create WhatsApp URLs for different scenarios
+  final whatsappUrlAndroid = Uri.parse(
+    "whatsapp://send?phone=+92$formattedNumber&text=Hello, I am interested in your property listing."
+  );
+  final whatsappUrlWeb = Uri.parse(
+    'https://wa.me/92$formattedNumber?text=Hello, I am interested in your property listing.'
+  );
+
+  try {
+    // Try launching WhatsApp app first
+    if (await canLaunchUrl(whatsappUrlAndroid)) {
+      await launchUrl(whatsappUrlAndroid);
+    } 
+    // If app launch fails, try web version
+    else if (await canLaunchUrl(whatsappUrlWeb)) {
+      await launchUrl(whatsappUrlWeb);
+    } 
+    // If both fail, show error
+    else {
       Get.snackbar(
-        'Error', 
-        'Failed to open WhatsApp: ${e.toString()}',
+        'Error',
+        'WhatsApp is not installed',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        duration: Duration(seconds: 2),
       );
     }
+  } catch (e) {
+    Get.snackbar(
+      'Error',
+      'Could not launch WhatsApp',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red.withOpacity(0.1),
+      duration: Duration(seconds: 2),
+    );
   }
+}
 
   @override
   void dispose() {

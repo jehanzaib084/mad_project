@@ -51,8 +51,9 @@ class BasicInfoStep extends StatelessWidget {
           ),
           validator: (value) {
             if (value?.isEmpty ?? true) return 'Description is required';
-            if (value!.split(' ').length > 100)
+            if (value!.split(' ').length > 100) {
               return 'Description cannot exceed 100 words';
+            }
             return null;
           },
           onChanged: (value) {

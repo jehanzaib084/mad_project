@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:mad_project/home_screens/posts_screens/controller/favorite_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/controller/posts_screen_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
-import 'package:mad_project/home_screens/posts_screens/view/image_carousel_dialog.dart';
 import 'package:mad_project/home_screens/posts_screens/view/reviews_list.dart';
 
 class PostDetailView extends StatelessWidget {
@@ -72,6 +72,12 @@ class PostDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!favoriteController.isFavorite(post.id)) {
+        controller.incrementPostView(post);
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text(post.propertyName),
@@ -105,36 +111,26 @@ class PostDetailView extends StatelessWidget {
             Stack(
               alignment: Alignment.bottomCenter,
               children: [
-                CarouselSlider.builder(
-                  itemCount: post.images.length,
-                  options: CarouselOptions(
-                    height: 250,
-                    enableInfiniteScroll: false,
-                    enlargeCenterPage: true,
-                    onPageChanged: (index, reason) =>
+                SizedBox(
+                  height: 250,
+                  child: PhotoViewGallery.builder(
+                    scrollPhysics: const BouncingScrollPhysics(),
+                    builder: (BuildContext context, int index) {
+                      return PhotoViewGalleryPageOptions(
+                        imageProvider:
+                            MemoryImage(base64Decode(post.images[index])),
+                        minScale: PhotoViewComputedScale.contained,
+                        maxScale: PhotoViewComputedScale.covered * 2,
+                      );
+                    },
+                    itemCount: post.images.length,
+                    loadingBuilder: (context, event) => Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    pageController: controller.detailPageController,
+                    onPageChanged: (index) =>
                         controller.currentPage.value = index,
                   ),
-                  itemBuilder: (context, index, realIndex) {
-                    return GestureDetector(
-                      onTap: () => Get.dialog(
-                        ImageCarouselDialog(
-                          images: post.images,
-                          initialIndex: controller.currentPage.value,
-                        ),
-                      ),
-                      child: Image.memory(
-                        base64Decode(post.images[index]),
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.grey[200],
-                            child: Icon(Icons.broken_image, size: 50),
-                          );
-                        },
-                      ),
-                    );
-                  },
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -177,9 +173,12 @@ class PostDetailView extends StatelessWidget {
                     crossAxisCount: 3,
                     childAspectRatio: 2.5,
                     children: [
-                      _buildAmenityItem(Icons.lightbulb, 'Light: ${post.light ? "Yes" : "No"}'),
-                      _buildAmenityItem(Icons.water_drop, 'Water: ${post.water ? "Yes" : "No"}'),
-                      _buildAmenityItem(Icons.wifi, 'WiFi: ${post.hasWifi ? "Yes" : "No"}'),
+                      _buildAmenityItem(Icons.lightbulb,
+                          'Light: ${post.light ? "Yes" : "No"}'),
+                      _buildAmenityItem(Icons.water_drop,
+                          'Water: ${post.water ? "Yes" : "No"}'),
+                      _buildAmenityItem(
+                          Icons.wifi, 'WiFi: ${post.hasWifi ? "Yes" : "No"}'),
                     ],
                   ),
 
@@ -199,8 +198,10 @@ class PostDetailView extends StatelessWidget {
                   Text('Garage: ${post.garage ? "Yes" : "No"}'),
                   Text('Kitchen: ${post.kitchen ? "Yes" : "No"}'),
                   Text('Gyser: ${post.gyser ? "Yes" : "No"}'),
-                  Text('WiFi Details: ${post.hasWifi ? post.wifiDetails : "No"}'),
-                  Text('Meals Included: ${post.mealsIncluded ? post.mealDetails : "No"}'),
+                  Text(
+                      'WiFi Details: ${post.hasWifi ? post.wifiDetails : "No"}'),
+                  Text(
+                      'Meals Included: ${post.mealsIncluded ? post.mealDetails : "No"}'),
                   Text('Number of Persons per Room: ${post.studentsPerRoom}'),
                   Text('Location: ${post.location}'),
 

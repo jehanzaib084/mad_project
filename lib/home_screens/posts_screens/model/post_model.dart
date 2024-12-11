@@ -1,5 +1,4 @@
 // post_model.dart
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mad_project/home_screens/posts_screens/model/review_model.dart';
 
 class Post {
@@ -27,6 +26,8 @@ class Post {
   final String gender;
   final String email;
   final String createdAt;
+  final int views;
+  final List<String> viewedBy;
 
   Post({
     required this.id,
@@ -53,6 +54,8 @@ class Post {
     required this.mealDetails,
     required this.gender,
     required this.createdAt,
+    this.views = 0,
+    this.viewedBy = const [],
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
@@ -81,6 +84,8 @@ class Post {
       mealDetails: json['mealDetails']?.toString() ?? 'Not included',
       gender: json['gender']?.toString() ?? 'boys',
       createdAt: '',
+      views: json['views'] ?? 0,
+      viewedBy: List<String>.from(json['viewedBy'] ?? []),
     );
   }
 
@@ -110,6 +115,8 @@ class Post {
       'mealDetails': mealDetails,
       'gender': gender,
       'createdAt': createdAt,
+      'views': views,
+      'viewedBy': viewedBy,
     };
   }
 }

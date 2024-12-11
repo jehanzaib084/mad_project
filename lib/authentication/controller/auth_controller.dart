@@ -19,14 +19,14 @@ class AuthController extends GetxController {
   final RxBool isLoading = false.obs;
 
   final RxInt resendTimer = 60.obs;
-  final RxBool canResendEmail = true.obs;
+  final RxBool canResendEmail = false.obs;
   Timer? _timer;
 
-  Future<void> startResendTimer() async {
+  void startResendTimer() {
     canResendEmail.value = false;
     resendTimer.value = 60;
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer?.cancel();
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (resendTimer.value > 0) {
         resendTimer.value--;
       } else {
@@ -177,9 +177,12 @@ class AuthController extends GetxController {
               const SizedBox(height: 20),
               Obx(() => Text(
                     canResendEmail.value
-                        ? 'You can resend the verification email'
-                        : 'Resend available in ${resendTimer.value}s',
-                    style: TextStyle(color: Assets.lightTextColor),
+                        ? 'Resend verification email'
+                        : 'Resend email in ${resendTimer.value}s',
+                    style: TextStyle(
+                      color: Assets.lightTextColor,
+                      fontSize: 14,
+                    ),
                   )),
             ],
           ),
@@ -201,13 +204,14 @@ class AuthController extends GetxController {
                             : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Assets.btnBgColor,
+                          disabledBackgroundColor: Colors.grey[300],
                         ),
                         child: Text(
-                          'Resend Email',
+                          'Resend',
                           style: TextStyle(
                             color: canResendEmail.value
                                 ? Colors.white
-                                : Colors.grey,
+                                : Colors.grey[600],
                           ),
                         ),
                       )),
@@ -216,6 +220,7 @@ class AuthController extends GetxController {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () async {
+                      _timer?.cancel();
                       await deleteUnverifiedUser();
                       Get.back();
                     },
@@ -235,6 +240,8 @@ class AuthController extends GetxController {
       ),
       barrierDismissible: false,
     );
+
+    startResendTimer();
 
     // Start verification check loop
     bool isVerified = false;

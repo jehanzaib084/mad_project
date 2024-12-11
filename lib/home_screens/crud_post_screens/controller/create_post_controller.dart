@@ -7,7 +7,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mad_project/home_screens/master_nav/controller/master_nav_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreatePostController extends GetxController {
   final currentStep = 0.obs;
@@ -44,10 +46,38 @@ class CreatePostController extends GetxController {
   final selectedImages = <File>[].obs;
   static const int maxImages = 10;
 
+  final currentImageIndex = 0.obs;
+  bool isEditMode = false;
+  final String createPostRoute = '/create_post';
+
   @override
   void onInit() {
     super.onInit();
+
+    // Handle master nav changes
+    ever(Get.find<MasterNavController>().selectedIndex, (index) {
+      if (index != 2 && isEditMode) {
+        // 2 is create post tab index
+        resetForm();
+        isEditMode = false;
+      }
+    });
     _prefillPhoneNumber();
+  }
+
+  Future<void> _prefillPhoneNumber() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final storedPhone = prefs.getString('phoneNumber');
+      if (storedPhone != null) {
+        // Remove any existing +92 prefix if present
+        final cleanPhone =
+            storedPhone.replaceAll('+92', '').replaceAll(' ', '');
+        phoneController.text = cleanPhone;
+      }
+    } catch (e) {
+      print('Error loading phone number: $e');
+    }
   }
 
   void nextStep() {
@@ -193,7 +223,7 @@ class CreatePostController extends GetxController {
     descriptionController.clear();
     priceController.clear();
     locationController.clear();
-    phoneController.clear();
+    // phoneController.clear();
 
     facilities.forEach((key, value) {
       value.value = false;
@@ -210,68 +240,72 @@ class CreatePostController extends GetxController {
   }
 
   Future<void> submitForm() async {
-  if (!validateAllFields()) return;
+    if (!validateAllFields()) return;
 
-  try {
-    isLoading.value = true;
-    final user = FirebaseAuth.instance.currentUser;
+    try {
+      isLoading.value = true;
+      final user = FirebaseAuth.instance.currentUser;
 
-    if (user == null) {
+      if (user == null) {
+        Get.snackbar(
+          'Error',
+          'Please login to create a post',
+          backgroundColor: Colors.red.withOpacity(0.1),
+        );
+        return;
+      }
+
+      final postRef = FirebaseFirestore.instance.collection('posts').doc();
+      final postId = postRef.id;
+      var time = DateTime.now().toIso8601String();
+
+      final postData = Post(
+        id: postId,
+        email: user.email ?? '',
+        propertyName: propertyNameController.text,
+        propertyType: propertyTypeController.text,
+        description: descriptionController.text,
+        images: base64Images,
+        garage: facilities['garage']?.value ?? false,
+        light: facilities['light']?.value ?? false,
+        water: facilities['water']?.value ?? false,
+        kitchen: facilities['kitchen']?.value ?? false,
+        gyser: facilities['gyser']?.value ?? false,
+        price: priceController.text,
+        rating: '0',
+        ownerPhone: phoneController.text,
+        location: locationController.text,
+        hasWifi: (features['hasWifi'] as RxBool).value,
+        mealsIncluded: (features['mealsIncluded'] as RxBool).value,
+        studentsPerRoom: (features['studentsPerRoom'] as RxInt).value,
+        reviews: [],
+        wifiDetails: (features['hasWifi'] as RxBool).value
+            ? 'Available'
+            : 'Not available',
+        mealDetails: (features['mealsIncluded'] as RxBool).value
+            ? 'Included'
+            : 'Not included',
+        gender: (features['gender'] as RxString).value,
+        userId: user.uid,
+        createdAt: time,
+      ).toJson();
+
+      await postRef.set(postData);
+
+      showSuccessMsg();
+
+      resetForm();
+      Get.back();
+    } catch (e) {
       Get.snackbar(
         'Error',
-        'Please login to create a post',
+        'Failed to create post: $e',
         backgroundColor: Colors.red.withOpacity(0.1),
       );
-      return;
+    } finally {
+      isLoading.value = false;
     }
-
-    final postRef = FirebaseFirestore.instance.collection('posts').doc();
-    final postId = postRef.id;
-    var time = DateTime.now().toIso8601String();
-
-    final postData = Post(
-      id: postId,
-      email: user.email ?? '',
-      propertyName: propertyNameController.text,
-      propertyType: propertyTypeController.text,
-      description: descriptionController.text,
-      images: base64Images,
-      garage: facilities['garage']?.value ?? false,
-      light: facilities['light']?.value ?? false,
-      water: facilities['water']?.value ?? false,
-      kitchen: facilities['kitchen']?.value ?? false,
-      gyser: facilities['gyser']?.value ?? false,
-      price: priceController.text,
-      rating: '0',
-      ownerPhone: phoneController.text,
-      location: locationController.text,
-      hasWifi: (features['hasWifi'] as RxBool).value,
-      mealsIncluded: (features['mealsIncluded'] as RxBool).value,
-      studentsPerRoom: (features['studentsPerRoom'] as RxInt).value,
-      reviews: [],
-      wifiDetails: (features['hasWifi'] as RxBool).value ? 'Available' : 'Not available',
-      mealDetails: (features['mealsIncluded'] as RxBool).value ? 'Included' : 'Not included',
-      gender: (features['gender'] as RxString).value,
-      userId: user.uid,
-      createdAt: time,
-    ).toJson();
-
-    await postRef.set(postData);
-
-    showSuccessMsg();
-
-    resetForm();
-    Get.back();
-  } catch (e) {
-    Get.snackbar(
-      'Error',
-      'Failed to create post: $e',
-      backgroundColor: Colors.red.withOpacity(0.1),
-    );
-  } finally {
-    isLoading.value = false;
   }
-}
 
   Future<void> showSuccessMsg() async {
     Get.snackbar(
@@ -281,20 +315,8 @@ class CreatePostController extends GetxController {
     );
   }
 
-  void _fetchUserPhoneNumber() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-      if (userDoc.exists) {
-        final userData = userDoc.data();
-        if (userData != null && userData.containsKey('phoneNumber')) {
-          phoneController.text = userData['phoneNumber'];
-        }
-      }
-    }
-  }
-
   void prefillData(Post post) {
+    isEditMode = true;
     propertyNameController.text = post.propertyName;
     propertyTypeController.text = post.propertyType;
     descriptionController.text = post.description;
@@ -338,17 +360,6 @@ class CreatePostController extends GetxController {
     return true;
   }
 
-  Future<void> _prefillPhoneNumber() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-      if (userDoc.exists) {
-        final phoneNumber = userDoc.data()?['phoneNumber'] ?? '';
-        phoneController.text = phoneNumber;
-      }
-    }
-  }
-
   @override
   void onClose() {
     propertyNameController.dispose();
@@ -357,6 +368,10 @@ class CreatePostController extends GetxController {
     priceController.dispose();
     locationController.dispose();
     phoneController.dispose();
+    if (isEditMode) {
+      resetForm();
+      isEditMode = false;
+    }
     super.onClose();
   }
 }

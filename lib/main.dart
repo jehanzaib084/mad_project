@@ -4,10 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mad_project/authentication/controller/auth_controller.dart';
 import 'package:mad_project/authentication/view/intro_screen.dart';
 import 'package:mad_project/home_screens/master_nav/master_nav.dart';
-import 'package:mad_project/home_screens/posts_screens/controller/favorite_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'pages/pages.dart';
@@ -23,7 +21,6 @@ Future<void> main() async {
 
   // Initialize controllers
   
-  Get.put(FavoriteController());
 
   runApp(const MyApp());
 }

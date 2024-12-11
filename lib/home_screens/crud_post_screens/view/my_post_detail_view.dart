@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mad_project/home_screens/crud_post_screens/controller/my_posts_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,8 +9,9 @@ import 'package:mad_project/home_screens/crud_post_screens/controller/create_pos
 
 class MyPostDetailView extends StatelessWidget {
   final Post post;
+  final controller = Get.put(MyPostDetailController());
 
-  const MyPostDetailView({required this.post, super.key});
+  MyPostDetailView({required this.post, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,46 +34,61 @@ class MyPostDetailView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image Carousel
-            Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                SizedBox(
+            Obx(() {
+              if (controller.isLoading.value) {
+                return SizedBox(
                   height: 250,
-                  child: PageView.builder(
-                    itemCount: post.images.length,
-                    itemBuilder: (context, index) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.memory(
-                          base64Decode(post.images[index]),
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey[200],
-                              child: Icon(Icons.broken_image, size: 50),
-                            );
-                          },
-                        ),
-                      );
-                    },
+                  child: Center(
+                    child: CircularProgressIndicator(),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: SmoothPageIndicator(
-                    controller: PageController(),
-                    count: post.images.length,
-                    effect: const WormEffect(
-                      dotHeight: 8,
-                      dotWidth: 8,
-                      activeDotColor: Colors.white,
-                      dotColor: Colors.white54,
+                );
+              }
+
+              return Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  SizedBox(
+                    height: 250,
+                    child: PageView.builder(
+                      controller: controller.pageController,
+                      itemCount: post.images.length,
+                      onPageChanged: (index) {
+                        controller.currentPage.value = index;
+                      },
+                      itemBuilder: (context, index) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.memory(
+                            base64Decode(post.images[index]),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[200],
+                                child: Icon(Icons.broken_image, size: 50),
+                              );
+                            },
+                          ),
+                        );
+                      },
                     ),
                   ),
-                ),
-              ],
-            ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SmoothPageIndicator(
+                      controller: controller.pageController,
+                      count: post.images.length,
+                      effect: const WormEffect(
+                        dotHeight: 8,
+                        dotWidth: 8,
+                        activeDotColor: Colors.white,
+                        dotColor: Colors.white54,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -98,9 +115,12 @@ class MyPostDetailView extends StatelessWidget {
                     crossAxisCount: 3,
                     childAspectRatio: 2.5,
                     children: [
-                      _buildAmenityItem(Icons.lightbulb, 'Light: ${post.light}'),
-                      _buildAmenityItem(Icons.water_drop, 'Water: ${post.water}'),
-                      _buildAmenityItem(Icons.wifi, 'WiFi: ${post.hasWifi ? "Yes" : "No"}'),
+                      _buildAmenityItem(Icons.lightbulb,
+                          'Light: ${post.light ? "Yes" : "No"}'),
+                      _buildAmenityItem(Icons.water_drop,
+                          'Water: ${post.water ? "Yes" : "No"}'),
+                      _buildAmenityItem(
+                          Icons.wifi, 'WiFi: ${post.hasWifi ? "Yes" : "No"}'),
                     ],
                   ),
 
@@ -117,11 +137,13 @@ class MyPostDetailView extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
-                  Text('Garage: ${post.garage}'),
-                  Text('Kitchen: ${post.kitchen}'),
-                  Text('Gyser: ${post.gyser}'),
-                  Text('WiFi Details: ${post.hasWifi ? post.wifiDetails : "No"}'),
-                  Text('Meals Included: ${post.mealsIncluded ? post.mealDetails : "No"}'),
+                  Text('Garage: ${post.garage ? "Yes" : "No"}'),
+                  Text('Kitchen: ${post.kitchen ? "Yes" : "No"}'),
+                  Text('Gyser: ${post.gyser ? "Yes" : "No"}'),
+                  Text(
+                      'WiFi Details: ${post.hasWifi ? post.wifiDetails : "No"}'),
+                  Text(
+                      'Meals Included: ${post.mealsIncluded ? post.mealDetails : "No"}'),
                   Text('Number of Persons per Room: ${post.studentsPerRoom}'),
                   Text('Location: ${post.location}'),
 
@@ -137,6 +159,23 @@ class MyPostDetailView extends StatelessWidget {
                   Text(
                     'Phone: ${post.ownerPhone}',
                     style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        Icon(Icons.visibility, color: Colors.grey),
+                        SizedBox(width: 8),
+                        Text(
+                          '${post.views} Views',
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -217,7 +256,8 @@ class MyPostDetailView extends StatelessWidget {
   }
 
   void _editPost(BuildContext context) {
-    final CreatePostController createPostController = Get.put(CreatePostController());
+    final CreatePostController createPostController =
+        Get.put(CreatePostController());
     createPostController.propertyNameController.text = post.propertyName;
     createPostController.propertyTypeController.text = post.propertyType;
     createPostController.descriptionController.text = post.description;
@@ -232,7 +272,8 @@ class MyPostDetailView extends StatelessWidget {
     createPostController.facilities['gyser']?.value = post.gyser;
     createPostController.features['hasWifi']?.value = post.hasWifi;
     createPostController.features['mealsIncluded']?.value = post.mealsIncluded;
-    createPostController.features['studentsPerRoom']?.value = post.studentsPerRoom;
+    createPostController.features['studentsPerRoom']?.value =
+        post.studentsPerRoom;
     createPostController.features['gender']?.value = post.gender;
 
     Get.toNamed('/create_post', arguments: post);
@@ -258,7 +299,10 @@ class MyPostDetailView extends StatelessWidget {
 
     if (result == true) {
       try {
-        await FirebaseFirestore.instance.collection('posts').doc(post.id).delete();
+        await FirebaseFirestore.instance
+            .collection('posts')
+            .doc(post.id)
+            .delete();
         Get.back();
         Get.snackbar(
           'Success',

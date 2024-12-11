@@ -1,14 +1,16 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:carousel_slider/carousel_slider.dart';
+// import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/home_screens/crud_post_screens/controller/create_post_controller.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class MediaContactStep extends StatelessWidget {
   final CreatePostController controller = Get.find<CreatePostController>();
+  final pageController = PageController();
   final Function() onImagePick;
   final Function() onSubmit;
   final Function() onPrevious;
@@ -36,62 +38,101 @@ class MediaContactStep extends StatelessWidget {
             if (controller.selectedImages.isEmpty) {
               return Center(child: Text('No images selected'));
             }
-      
+
             return Column(
               children: [
                 Text(
                     '${controller.selectedImages.length}/${CreatePostController.maxImages} images'),
                 SizedBox(height: 8),
-                CarouselSlider.builder(
-                  itemCount: controller.selectedImages.length,
-                  options: CarouselOptions(
-                    height: 200,
-                    enableInfiniteScroll: false,
-                    viewportFraction: 0.8,
-                    enlargeCenterPage: true,
+                SizedBox(
+                  height: 200,
+                  child: Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      PageView.builder(
+                        controller: pageController,
+                        itemCount: controller.selectedImages.length,
+                        onPageChanged: (index) {
+                          controller.currentImageIndex.value = index;
+                        },
+                        itemBuilder: (context, index) {
+                          return Stack(
+                            children: [
+                              // Image Container
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8),
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 200,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: Colors.grey[200],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.memory(
+                                      base64Decode(
+                                          controller.base64Images[index]),
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Icon(Icons.broken_image,
+                                            size: 50);
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // Close Button
+                              Positioned(
+                                top: 12,
+                                right: 16,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    controller.removeImage(index);
+                                    if (controller.selectedImages.isEmpty)
+                                      return;
+                                    if (index ==
+                                        controller.selectedImages.length) {
+                                      pageController.jumpToPage(index - 1);
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black45,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      // Page indicator
+                      Positioned(
+                        bottom: 8,
+                        child: Obx(() => SmoothPageIndicator(
+                              controller: pageController,
+                              count: controller.selectedImages.length,
+                              effect: WormEffect(
+                                dotHeight: 8,
+                                dotWidth: 8,
+                                activeDotColor: Theme.of(context).primaryColor,
+                                dotColor: Colors.grey.shade400,
+                              ),
+                            )),
+                      ),
+                    ],
                   ),
-                  itemBuilder: (context, index, realIndex) {
-                    return Stack(
-                      children: [
-                        Container(
-                          margin: EdgeInsets.symmetric(horizontal: 5),
-                          width: double.infinity,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.memory(
-                              base64Decode(controller.base64Images[index]),
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  color: Colors.grey[200],
-                                  child: Icon(Icons.broken_image, size: 50),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 5,
-                          right: 5,
-                          child: InkWell(
-                            onTap: () => controller.removeImage(index),
-                            child: Container(
-                              padding: EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.close,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
                 ),
               ],
             );
@@ -152,7 +193,8 @@ class MediaContactStep extends StatelessWidget {
               if (digits != value) {
                 controller.phoneController.text =
                     digits.substring(0, min(digits.length, 10));
-                controller.phoneController.selection = TextSelection.fromPosition(
+                controller.phoneController.selection =
+                    TextSelection.fromPosition(
                   TextPosition(offset: controller.phoneController.text.length),
                 );
               }

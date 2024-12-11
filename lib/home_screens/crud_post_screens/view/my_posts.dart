@@ -11,6 +11,96 @@ import 'package:mad_project/home_screens/master_nav/controller/master_nav_contro
 class MyPostsScreen extends StatelessWidget {
   const MyPostsScreen({super.key});
 
+  int _calculateTotalViews(List<Post> posts) {
+    return posts.fold(0, (sum, post) => sum + post.views);
+  }
+
+// Replace the existing Dashboard section with this new implementation
+  Widget _buildDashboard(BuildContext context, List<Post> posts) {
+    final totalViews = _calculateTotalViews(posts);
+
+    return Card(
+      margin: const EdgeInsets.all(16.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.dashboard, color: Theme.of(context).primaryColor),
+                SizedBox(width: 8),
+                Text(
+                  'Dashboard',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
+            Divider(height: 24),
+            GridView.count(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1.0,
+              children: [
+                _buildStatCard(
+                  context,
+                  'Total Posts',
+                  '${posts.length}',
+                  Icons.post_add,
+                  Colors.blue,
+                ),
+                _buildStatCard(
+                  context,
+                  'Total Views',
+                  '$totalViews',
+                  Icons.visibility,
+                  Colors.green,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(BuildContext context, String title, String value,
+      IconData icon, Color color) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 32, color: color),
+            SizedBox(height: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -30,7 +120,8 @@ class MyPostsScreen extends StatelessWidget {
               children: [
                 // Image Section
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(15)),
                   child: Image.memory(
                     base64Decode(post.images.first),
                     height: 200,
@@ -61,7 +152,8 @@ class MyPostsScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                          const Icon(Icons.location_on,
+                              size: 16, color: Colors.grey),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
@@ -149,35 +241,10 @@ class MyPostsScreen extends StatelessWidget {
                   return Post.fromJson(doc.data() as Map<String, dynamic>);
                 }).toList();
 
-                return Column(
+                return ListView(
                   children: [
-                    // Dashboard
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Dashboard',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 8),
-                          Text('Total Created Posts: ${posts.length}'),
-                          const SizedBox(height: 8),
-                          // Add more dashboard items here
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        padding: EdgeInsets.all(8),
-                        itemCount: posts.length,
-                        itemBuilder: (context, index) {
-                          final post = posts[index];
-                          return buildPostCard(post);
-                        },
-                      ),
-                    ),
+                    _buildDashboard(context, posts),
+                    ...posts.map((post) => buildPostCard(post)),
                   ],
                 );
               },
