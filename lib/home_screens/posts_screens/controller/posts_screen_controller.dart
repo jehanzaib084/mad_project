@@ -1,15 +1,16 @@
-import 'dart:convert';
+// import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PostController extends GetxController {
   final RxBool isLoading = false.obs;
-  final RxList<Post> allPosts = <Post>[].obs; // Observable list of posts
+  final List<Post> allPosts = []; // Non-reactive list
   final RxList<Post> filteredPosts = <Post>[].obs;
   final RxList<String> selectedFilters = <String>[].obs;
+  final RxBool hasMorePosts = true.obs; // To track if more posts are available
   final RxString error = ''.obs;
 
   /// Create separate controllers for detail view and dialog
@@ -17,7 +18,8 @@ class PostController extends GetxController {
   final PageController dialogPageController = PageController();
   final RxInt currentPage = 0.obs;
 
-  final RxString phoneNumber = '+923054266700'.obs;
+  final int pageSize = 100;
+  DocumentSnapshot? lastDocument;
 
   @override
   void onInit() {
@@ -35,17 +37,39 @@ class PostController extends GetxController {
   }
 
   // Load posts from the local file (no pagination logic needed)
-  Future<void> loadPosts() async {
+  Future<void> loadPosts({bool isRefresh = false}) async {
     try {
+      if (isRefresh) {
+        lastDocument = null;
+        allPosts.clear();
+        hasMorePosts.value = true;
+      }
+
+      if (!hasMorePosts.value) return;
+
       isLoading.value = true;
       error.value = '';
-      
-      final String response = await rootBundle.loadString('assets/dummy_posts.json');
-      final List<dynamic> data = json.decode(response);
-      final List<Post> newPosts = data.map((json) => Post.fromJson(json)).toList();
-      
-      allPosts.clear(); // Clear existing posts
-      allPosts.addAll(newPosts);
+
+      Query query = FirebaseFirestore.instance
+          .collection('posts')
+          .orderBy('createdAt', descending: true)
+          .limit(pageSize);
+
+      if (lastDocument != null) {
+        query = query.startAfterDocument(lastDocument!);
+      }
+
+      final querySnapshot = await query.get();
+      final List<Post> newPosts = querySnapshot.docs.map((doc) {
+        return Post.fromJson(doc.data() as Map<String, dynamic>);
+      }).toList();
+
+      if (newPosts.isNotEmpty) {
+        lastDocument = querySnapshot.docs.last;
+        allPosts.addAll(newPosts);
+      } else {
+        hasMorePosts.value = false;
+      }
     } catch (e) {
       error.value = 'Failed to load posts: $e';
       Get.snackbar(
@@ -56,6 +80,17 @@ class PostController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+      update(); // Update the controller to refresh the UI
+    }
+  }
+
+  Future<void> refreshPosts() async {
+    await loadPosts(isRefresh: true);
+  }
+
+  Future<void> loadMorePosts() async {
+    if (!isLoading.value) {
+      await loadPosts();
     }
   }
 

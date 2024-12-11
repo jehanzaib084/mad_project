@@ -1,9 +1,9 @@
-// Updated PostDetailView.dart
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
-import 'package:mad_project/home_screens/posts_screens/controller/favorite_controller.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:mad_project/home_screens/posts_screens/controller/favorite_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/controller/posts_screen_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
 import 'package:mad_project/home_screens/posts_screens/view/image_carousel_dialog.dart';
@@ -14,6 +14,7 @@ class PostDetailView extends StatelessWidget {
   final bool isLoved;
   final VoidCallback onLoveToggle;
   final PostController controller = Get.find<PostController>();
+  final FavoriteController favoriteController = Get.find<FavoriteController>();
   final RxBool isDescriptionExpanded = false.obs;
 
   PostDetailView({
@@ -104,32 +105,36 @@ class PostDetailView extends StatelessWidget {
             Stack(
               alignment: Alignment.bottomCenter,
               children: [
-                SizedBox(
-                  height: 250,
-                  child: PageView.builder(
-                    controller: controller.detailPageController,
-                    onPageChanged: controller.onPageChanged,
-                    itemCount: post.images.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () => Get.dialog(
-                          ImageCarouselDialog(
-                            images: post.images,
-                            initialIndex: controller.currentPage.value,
-                          ),
-                        ),
-                        child: CachedNetworkImage(
-                          imageUrl: post.images[index],
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                          errorWidget: (context, url, error) =>
-                              const Icon(Icons.error),
-                        ),
-                      );
-                    },
+                CarouselSlider.builder(
+                  itemCount: post.images.length,
+                  options: CarouselOptions(
+                    height: 250,
+                    enableInfiniteScroll: false,
+                    enlargeCenterPage: true,
+                    onPageChanged: (index, reason) =>
+                        controller.currentPage.value = index,
                   ),
+                  itemBuilder: (context, index, realIndex) {
+                    return GestureDetector(
+                      onTap: () => Get.dialog(
+                        ImageCarouselDialog(
+                          images: post.images,
+                          initialIndex: controller.currentPage.value,
+                        ),
+                      ),
+                      child: Image.memory(
+                        base64Decode(post.images[index]),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[200],
+                            child: Icon(Icons.broken_image, size: 50),
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -146,7 +151,6 @@ class PostDetailView extends StatelessWidget {
                 ),
               ],
             ),
-
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -173,8 +177,8 @@ class PostDetailView extends StatelessWidget {
                     crossAxisCount: 3,
                     childAspectRatio: 2.5,
                     children: [
-                      _buildAmenityItem(Icons.lightbulb, 'Light: ${post.light}'),
-                      _buildAmenityItem(Icons.water_drop, 'Water: ${post.water}'),
+                      _buildAmenityItem(Icons.lightbulb, 'Light: ${post.light ? "Yes" : "No"}'),
+                      _buildAmenityItem(Icons.water_drop, 'Water: ${post.water ? "Yes" : "No"}'),
                       _buildAmenityItem(Icons.wifi, 'WiFi: ${post.hasWifi ? "Yes" : "No"}'),
                     ],
                   ),
@@ -192,9 +196,9 @@ class PostDetailView extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
-                  Text('Garage: ${post.garage}'),
-                  Text('Kitchen: ${post.kitchen}'),
-                  Text('Gyser: ${post.gyser}'),
+                  Text('Garage: ${post.garage ? "Yes" : "No"}'),
+                  Text('Kitchen: ${post.kitchen ? "Yes" : "No"}'),
+                  Text('Gyser: ${post.gyser ? "Yes" : "No"}'),
                   Text('WiFi Details: ${post.hasWifi ? post.wifiDetails : "No"}'),
                   Text('Meals Included: ${post.mealsIncluded ? post.mealDetails : "No"}'),
                   Text('Number of Persons per Room: ${post.studentsPerRoom}'),

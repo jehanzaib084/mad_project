@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:mad_project/home_screens/crud_post_screens/controller/create_post_controller.dart';
 
 class BasicInfoStep extends StatelessWidget {
-  final TextEditingController propertyNameController;
-  final TextEditingController propertyTypeController;
-  final TextEditingController descriptionController;
+  final CreatePostController controller = Get.find<CreatePostController>();
   final Function() onNext;
 
-  const BasicInfoStep({
+  BasicInfoStep({
     super.key,
-    required this.propertyNameController,
-    required this.propertyTypeController,
-    required this.descriptionController,
     required this.onNext,
   });
 
@@ -21,7 +18,7 @@ class BasicInfoStep extends StatelessWidget {
       children: [
         SizedBox(height: 16),
         TextFormField(
-          controller: propertyNameController,
+          controller: controller.propertyNameController,
           decoration: InputDecoration(
             labelText: 'Property Name',
             border: OutlineInputBorder(),
@@ -33,7 +30,7 @@ class BasicInfoStep extends StatelessWidget {
         ),
         SizedBox(height: 16),
         TextFormField(
-          controller: propertyTypeController,
+          controller: controller.propertyTypeController,
           decoration: InputDecoration(
             labelText: 'Property Type',
             border: OutlineInputBorder(),
@@ -45,7 +42,7 @@ class BasicInfoStep extends StatelessWidget {
         ),
         SizedBox(height: 16),
         TextFormField(
-          controller: descriptionController,
+          controller: controller.descriptionController,
           maxLines: 3,
           decoration: InputDecoration(
             labelText: 'Description',

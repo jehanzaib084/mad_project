@@ -1,6 +1,8 @@
+// posts_list.dart
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mad_project/home_screens/posts_screens/controller/favorite_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/controller/posts_screen_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
@@ -32,28 +34,41 @@ class PostsList extends StatelessWidget {
           ),
         ],
       ),
-      body: Container(
-        // decoration: const BoxDecoration(
-        //   color: Color((0xFFA6CCED)),
-        // ),
-        child: RefreshIndicator(
-          onRefresh: postController.loadPosts,
-          child: Obx(() {
-            if (postController.isLoading.value) {
-              return _buildLoadingShimmer();
-            }
-
-            if (postController.error.value.isNotEmpty) {
-              return _buildErrorView(postController.error.value);
-            }
-
-            if (postController.allPosts.isEmpty) {
-              return _buildEmptyView();
-            }
-
-            return _buildPostsList();
-          }),
-        ),
+      body: RefreshIndicator(
+        onRefresh: postController.refreshPosts,
+        child: Obx(() {
+          if (postController.isLoading.value && postController.allPosts.isEmpty) {
+            return _buildLoadingShimmer();
+          }
+      
+          if (postController.error.value.isNotEmpty) {
+            return _buildErrorView(postController.error.value);
+          }
+      
+          if (postController.allPosts.isEmpty) {
+            return _buildEmptyView();
+          }
+      
+          return NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
+                  !postController.isLoading.value) {
+                postController.loadMorePosts();
+              }
+              return false;
+            },
+            child: ListView.builder(
+              itemCount: postController.allPosts.length + 1,
+              itemBuilder: (context, index) {
+                if (index == postController.allPosts.length) {
+                  return _buildLoadingIndicator();
+                }
+                final post = postController.allPosts[index];
+                return _buildPostCard(post);
+              },
+            ),
+          );
+        }),
       ),
     );
   }
@@ -111,13 +126,37 @@ class PostsList extends StatelessWidget {
     );
   }
 
-  Widget _buildPostsList() {
-    return ListView.builder(
-      itemCount: postController.allPosts.length,
-      itemBuilder: (context, index) {
-        final post = postController.allPosts[index];
-        return _buildPostCard(post);
-      },
+  Widget _buildLoadingIndicator() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _buildPostCard(Post post) {
+    return GestureDetector(
+      onTap: () => Get.to(() => PostDetailView(
+            post: post,
+            isLoved: false,
+            onLoveToggle: () {},
+          )),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildPostImage(post),
+              _buildPostDetails(post),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -126,20 +165,12 @@ class PostsList extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-          child: CachedNetworkImage(
-            imageUrl: post.images.first,
+          child: Image.memory(
+            base64Decode(post.images.first),
             height: 200,
             width: double.infinity,
             fit: BoxFit.cover,
-            placeholder: (context, url) => Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: Container(
-                height: 200,
-                color: Colors.white,
-              ),
-            ),
-            errorWidget: (context, url, error) => Container(
+            errorBuilder: (context, error, stackTrace) => Container(
               height: 200,
               color: Colors.grey[300],
               child: const Icon(Icons.error),
@@ -211,31 +242,6 @@ class PostsList extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPostCard(Post post) {
-    return GestureDetector(
-      onTap: () => Get.to(() => PostDetailView(
-            post: post,
-            isLoved: false,
-            onLoveToggle: () {},
-          )),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildPostImage(post),
-              _buildPostDetails(post),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -1,7 +1,7 @@
 // my_post_detail_view.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+// import 'package:carousel_slider/carousel_slider.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';

@@ -8,23 +8,13 @@ import 'package:get/get.dart';
 import 'package:mad_project/home_screens/crud_post_screens/controller/create_post_controller.dart';
 
 class MediaContactStep extends StatelessWidget {
-  final TextEditingController priceController;
-  final TextEditingController locationController;
-  final TextEditingController phoneController;
-  final RxList<String> images;
-  static const int maxImages = 10; // Add constant
+  final CreatePostController controller = Get.find<CreatePostController>();
   final Function() onImagePick;
   final Function() onSubmit;
   final Function() onPrevious;
 
-  final controller = Get.find<CreatePostController>();
-
   MediaContactStep({
     super.key,
-    required this.priceController,
-    required this.locationController,
-    required this.phoneController,
-    required this.images,
     required this.onImagePick,
     required this.onSubmit,
     required this.onPrevious,
@@ -108,7 +98,7 @@ class MediaContactStep extends StatelessWidget {
           }),
           const SizedBox(height: 24),
           TextFormField(
-            controller: priceController,
+            controller: controller.priceController,
             decoration: InputDecoration(
               labelText: 'Price',
               suffixText: 'per month',
@@ -123,7 +113,7 @@ class MediaContactStep extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           TextFormField(
-            controller: locationController,
+            controller: controller.locationController,
             decoration: InputDecoration(
               labelText: 'Location',
               prefixIcon: Icon(Icons.location_on),
@@ -136,7 +126,7 @@ class MediaContactStep extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           TextFormField(
-            controller: phoneController,
+            controller: controller.phoneController,
             decoration: InputDecoration(
               labelText: 'Phone Number',
               prefixText: '+92 ',
@@ -160,10 +150,10 @@ class MediaContactStep extends StatelessWidget {
               // Remove any non-digits and limit to 10 digits
               final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
               if (digits != value) {
-                phoneController.text =
+                controller.phoneController.text =
                     digits.substring(0, min(digits.length, 10));
-                phoneController.selection = TextSelection.fromPosition(
-                  TextPosition(offset: phoneController.text.length),
+                controller.phoneController.selection = TextSelection.fromPosition(
+                  TextPosition(offset: controller.phoneController.text.length),
                 );
               }
             },

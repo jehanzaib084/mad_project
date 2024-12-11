@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'dart:convert';
 
 class ImageCarouselDialog extends StatelessWidget {
   final List<String> images;
@@ -33,7 +33,7 @@ class ImageCarouselDialog extends StatelessWidget {
             itemCount: images.length,
             builder: (context, index) {
               return PhotoViewGalleryPageOptions(
-                imageProvider: CachedNetworkImageProvider(images[index]),
+                imageProvider: MemoryImage(base64Decode(images[index])),
                 minScale: PhotoViewComputedScale.contained,
                 maxScale: PhotoViewComputedScale.covered * 2,
               );

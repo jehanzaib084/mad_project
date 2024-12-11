@@ -1,3 +1,4 @@
+// create_post.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/home_screens/crud_post_screens/controller/create_post_controller.dart';
@@ -79,9 +80,6 @@ class CreatePostScreen extends StatelessWidget {
               Step(
                 title: Text('Basic Information'),
                 content: BasicInfoStep(
-                  propertyNameController: controller.propertyNameController,
-                  propertyTypeController: controller.propertyTypeController,
-                  descriptionController: controller.descriptionController,
                   onNext: () => controller.validateAndProceed(0),
                 ),
                 isActive: controller.currentStep.value >= 0,
@@ -89,7 +87,6 @@ class CreatePostScreen extends StatelessWidget {
               Step(
                 title: Text('Facilities'),
                 content: FacilitiesStep(
-                  facilities: controller.facilities,
                   onNext: () => controller.validateAndProceed(1),
                   onPrevious: controller.previousStep,
                 ),
@@ -98,7 +95,6 @@ class CreatePostScreen extends StatelessWidget {
               Step(
                 title: Text('Additional Features'),
                 content: AdditionalFeaturesStep(
-                  features: controller.features,
                   onNext: () => controller.validateAndProceed(2),
                   onPrevious: controller.previousStep,
                 ),
@@ -107,10 +103,6 @@ class CreatePostScreen extends StatelessWidget {
               Step(
                 title: Text('Media & Contact'),
                 content: MediaContactStep(
-                  priceController: controller.priceController,
-                  locationController: controller.locationController,
-                  phoneController: controller.phoneController,
-                  images: controller.images,
                   onImagePick: controller.pickImages,
                   onSubmit: controller.submitForm,
                   onPrevious: controller.previousStep,

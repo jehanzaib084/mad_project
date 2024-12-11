@@ -1,3 +1,4 @@
+// create_post_controller.dart
 import 'dart:convert';
 import 'dart:io';
 
@@ -6,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
 
 class CreatePostController extends GetxController {
   final currentStep = 0.obs;
@@ -19,19 +21,19 @@ class CreatePostController extends GetxController {
   late final phoneController = TextEditingController();
 
   // Observable form data with proper typing
-  final facilities = RxMap<String, RxBool>({
+  final facilities = <String, RxBool>{
     'garage': false.obs,
     'light': false.obs,
     'water': false.obs,
     'kitchen': false.obs,
     'gyser': false.obs,
-  });
+  }.obs;
 
-  final features = {
-    'hasWifi': RxBool(false),
-    'mealsIncluded': RxBool(false),
-    'studentsPerRoom': RxInt(1),
-    'gender': RxString('boys'),
+  final features = <String, dynamic>{
+    'hasWifi': false.obs,
+    'mealsIncluded': false.obs,
+    'studentsPerRoom': 1.obs,
+    'gender': 'boys'.obs,
   }.obs;
 
   final images = <String>[].obs;
@@ -42,7 +44,11 @@ class CreatePostController extends GetxController {
   final selectedImages = <File>[].obs;
   static const int maxImages = 10;
 
-  
+  @override
+  void onInit() {
+    super.onInit();
+    _prefillPhoneNumber();
+  }
 
   void nextStep() {
     if (currentStep.value < 3) {
@@ -199,6 +205,8 @@ class CreatePostController extends GetxController {
     (features['gender'] as RxString).value = 'boys';
 
     base64Images.clear();
+    images.clear();
+    selectedImages.clear();
   }
 
   Future<void> submitForm() async {
@@ -217,29 +225,29 @@ class CreatePostController extends GetxController {
         return;
       }
 
-      final postData = {
-        'userId': user.uid,
-        'userEmail': user.email,
-        'propertyName': propertyNameController.text,
-        'propertyType': propertyTypeController.text,
-        'description': descriptionController.text,
-        'facilities':
-            facilities.map((key, value) => MapEntry(key, value.value)),
-        'features': {
-          'hasWifi': (features['hasWifi'] as RxBool).value,
-          'mealsIncluded': (features['mealsIncluded'] as RxBool).value,
-          'studentsPerRoom': (features['studentsPerRoom'] as RxInt).value,
-          'gender': (features['gender'] as RxString).value,
-        },
-        'price': double.parse(priceController.text),
-        'priceType': priceType.value,
-        'location': locationController.text,
-        'ownerPhone': phoneController.text,
-        'images': base64Images,
-        'createdAt': DateTime.now().toIso8601String(),
-        'rating': '0',
-        'reviews': [],
-      };
+      final postData = Post(
+        id: '',
+        propertyName: propertyNameController.text,
+        propertyType: propertyTypeController.text,
+        description: descriptionController.text,
+        images: base64Images,
+        garage: facilities['garage']?.value ?? false,
+        light: facilities['light']?.value ?? false,
+        water: facilities['water']?.value ?? false,
+        kitchen: facilities['kitchen']?.value ?? false,
+        gyser: facilities['gyser']?.value ?? false,
+        price: priceController.text,
+        rating: '0',
+        ownerPhone: phoneController.text,
+        location: locationController.text,
+        hasWifi: (features['hasWifi'] as RxBool).value,
+        mealsIncluded: (features['mealsIncluded'] as RxBool).value,
+        studentsPerRoom: (features['studentsPerRoom'] as RxInt).value,
+        reviews: [],
+        wifiDetails: (features['hasWifi'] as RxBool).value ? 'Available' : 'Not available',
+        mealDetails: (features['mealsIncluded'] as RxBool).value ? 'Included' : 'Not included',
+        gender: (features['gender'] as RxString).value,
+      ).toJson();
 
       await FirebaseFirestore.instance.collection('posts').add(postData);
 
@@ -257,6 +265,7 @@ class CreatePostController extends GetxController {
       isLoading.value = false;
     }
   }
+
   Future<void> showSuccessMsg() async {
     Get.snackbar(
       'Success',
@@ -264,6 +273,7 @@ class CreatePostController extends GetxController {
       backgroundColor: Colors.green.withOpacity(0.1),
     );
   }
+
   bool validateAllFields() {
     if (!validateBasicInfo()) return false;
     if (!validateFacilities()) return false;
@@ -287,6 +297,17 @@ class CreatePostController extends GetxController {
       return false;
     }
     return true;
+  }
+
+  Future<void> _prefillPhoneNumber() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        final phoneNumber = userDoc.data()?['phoneNumber'] ?? '';
+        phoneController.text = phoneNumber;
+      }
+    }
   }
 
   @override

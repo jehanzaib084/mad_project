@@ -68,7 +68,7 @@ class AuthController extends GetxController {
         );
       }
     } catch (e) {
-      print('Error deleting unverified user: $e');
+      // print('Error deleting unverified user: $e');
     }
   }
 

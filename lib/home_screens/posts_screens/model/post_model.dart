@@ -7,11 +7,11 @@ class Post {
   final String propertyType;
   final String description;
   final List<String> images;
-  final String garage;
-  final String light;
-  final String water;
-  final String kitchen;
-  final String gyser;
+  final bool garage;
+  final bool light;
+  final bool water;
+  final bool kitchen;
+  final bool gyser;
   final String price;
   final String rating;
   final String ownerPhone;
@@ -55,11 +55,11 @@ class Post {
       propertyType: json['propertyType']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
       images: (json['images'] as List?)?.map((e) => e.toString()).toList() ?? [],
-      garage: json['garage']?.toString() ?? 'No',
-      light: json['light']?.toString() ?? 'No',
-      water: json['water']?.toString() ?? 'No',
-      kitchen: json['kitchen']?.toString() ?? 'No',
-      gyser: json['gyser']?.toString() ?? 'No',
+      garage: json['garage'] ?? false,
+      light: json['light'] ?? false,
+      water: json['water'] ?? false,
+      kitchen: json['kitchen'] ?? false,
+      gyser: json['gyser'] ?? false,
       price: json['price']?.toString() ?? '',
       rating: json['rating']?.toString() ?? '0.0',
       ownerPhone: json['ownerPhone']?.toString() ?? '',

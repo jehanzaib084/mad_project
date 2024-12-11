@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mad_project/home_screens/crud_post_screens/controller/create_post_controller.dart';
 
 class FacilitiesStep extends StatelessWidget {
-  final RxMap facilities;
+  final CreatePostController controller = Get.find<CreatePostController>();
   final Function() onNext;
   final Function() onPrevious;
 
-  const FacilitiesStep({
+  FacilitiesStep({
     super.key,
-    required this.facilities,
     required this.onNext,
     required this.onPrevious,
   });
@@ -20,37 +20,37 @@ class FacilitiesStep extends StatelessWidget {
       children: [
         Obx(() => SwitchListTile(
           title: Text('Garage'),
-          value: facilities['garage'].value,
+          value: controller.facilities['garage']?.value ?? false,
           onChanged: (bool value) {
-            facilities['garage'].value = value;
+            controller.facilities['garage']?.value = value;
           },
         )),
         Obx(() => SwitchListTile(
           title: Text('Light'),
-          value: facilities['light'].value,
+          value: controller.facilities['light']?.value ?? false,
           onChanged: (bool value) {
-            facilities['light'].value = value;
+            controller.facilities['light']?.value = value;
           },
         )),
         Obx(() => SwitchListTile(
           title: Text('Water'),
-          value: facilities['water'].value,
+          value: controller.facilities['water']?.value ?? false,
           onChanged: (bool value) {
-            facilities['water'].value = value;
+            controller.facilities['water']?.value = value;
           },
         )),
         Obx(() => SwitchListTile(
           title: Text('Kitchen'),
-          value: facilities['kitchen'].value,
+          value: controller.facilities['kitchen']?.value ?? false,
           onChanged: (bool value) {
-            facilities['kitchen'].value = value;
+            controller.facilities['kitchen']?.value = value;
           },
         )),
         Obx(() => SwitchListTile(
           title: Text('Gyser'),
-          value: facilities['gyser'].value,
+          value: controller.facilities['gyser']?.value ?? false,
           onChanged: (bool value) {
-            facilities['gyser'].value = value;
+            controller.facilities['gyser']?.value = value;
           },
         )),
       ],

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mad_project/home_screens/crud_post_screens/controller/create_post_controller.dart';
 
 class AdditionalFeaturesStep extends StatelessWidget {
-  final RxMap features;
+  final CreatePostController controller = Get.find<CreatePostController>();
   final Function() onNext;
   final Function() onPrevious;
 
-  const AdditionalFeaturesStep({
+  AdditionalFeaturesStep({
     super.key,
-    required this.features,
     required this.onNext,
     required this.onPrevious,
   });
@@ -20,27 +20,27 @@ class AdditionalFeaturesStep extends StatelessWidget {
       children: [
         Obx(() => SwitchListTile(
           title: Text('WiFi Available'),
-          value: features['hasWifi'].value,
+          value: controller.features['hasWifi']?.value ?? false,
           onChanged: (bool value) {
-            features['hasWifi'].value = value;
+            controller.features['hasWifi']?.value = value;
           },
         )),
         Obx(() => SwitchListTile(
           title: Text('Meals Included'),
-          value: features['mealsIncluded'].value,
+          value: controller.features['mealsIncluded']?.value ?? false,
           onChanged: (bool value) {
-            features['mealsIncluded'].value = value;
+            controller.features['mealsIncluded']?.value = value;
           },
         )),
         TextFormField(
-          controller: TextEditingController(text: features['studentsPerRoom'].value.toString()),
+          controller: TextEditingController(text: controller.features['studentsPerRoom']?.value.toString() ?? '1'),
           decoration: InputDecoration(
             labelText: 'Students Per Room',
             border: OutlineInputBorder(),
           ),
           keyboardType: TextInputType.number,
           onChanged: (value) {
-            features['studentsPerRoom'].value = int.tryParse(value) ?? 1;
+            controller.features['studentsPerRoom']?.value = int.tryParse(value) ?? 1;
           },
           validator: (value) {
             if (int.tryParse(value ?? '') == null || int.parse(value!) < 1) {
@@ -51,7 +51,7 @@ class AdditionalFeaturesStep extends StatelessWidget {
         ),
         SizedBox(height: 16),
         DropdownButtonFormField<String>(
-          value: features['gender'].value,
+          value: controller.features['gender']?.value ?? 'boys',
           decoration: InputDecoration(
             labelText: 'Gender',
             border: OutlineInputBorder(),
@@ -63,7 +63,7 @@ class AdditionalFeaturesStep extends StatelessWidget {
             );
           }).toList(),
           onChanged: (newValue) {
-            features['gender'].value = newValue!;
+            controller.features['gender']?.value = newValue!;
           },
         ),
       ],
