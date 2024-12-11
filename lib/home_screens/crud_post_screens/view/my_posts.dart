@@ -1,4 +1,3 @@
-// my_posts.dart
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
 import 'package:mad_project/home_screens/crud_post_screens/view/my_post_detail_view.dart';
+import 'package:mad_project/home_screens/master_nav/controller/master_nav_controller.dart';
 
 class MyPostsScreen extends StatelessWidget {
   const MyPostsScreen({super.key});
@@ -14,6 +14,7 @@ class MyPostsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+    final MasterNavController navController = Get.find();
 
     Widget buildPostCard(Post post) {
       return GestureDetector(
@@ -112,7 +113,7 @@ class MyPostsScreen extends StatelessWidget {
           : StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('posts')
-                  .where('userId', isEqualTo: user.uid)
+                  .where('email', isEqualTo: user.email)
                   .orderBy('createdAt', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
@@ -136,7 +137,7 @@ class MyPostsScreen extends StatelessWidget {
                         Text('No posts yet'),
                         SizedBox(height: 16),
                         ElevatedButton(
-                          onPressed: () => Get.toNamed('/create_post'),
+                          onPressed: () => navController.goToCreatePost(),
                           child: Text('Create Post'),
                         ),
                       ],
@@ -144,20 +145,46 @@ class MyPostsScreen extends StatelessWidget {
                   );
                 }
 
-                return ListView.builder(
-                  padding: EdgeInsets.all(8),
-                  itemCount: snapshot.data!.docs.length,
-                  itemBuilder: (context, index) {
-                    final doc = snapshot.data!.docs[index];
-                    final post = Post.fromJson(doc.data() as Map<String, dynamic>);
-                    return buildPostCard(post);
-                  },
+                final posts = snapshot.data!.docs.map((doc) {
+                  return Post.fromJson(doc.data() as Map<String, dynamic>);
+                }).toList();
+
+                return Column(
+                  children: [
+                    // Dashboard
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Dashboard',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          Text('Total Created Posts: ${posts.length}'),
+                          const SizedBox(height: 8),
+                          // Add more dashboard items here
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        padding: EdgeInsets.all(8),
+                        itemCount: posts.length,
+                        itemBuilder: (context, index) {
+                          final post = posts[index];
+                          return buildPostCard(post);
+                        },
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
       floatingActionButton: user != null
           ? FloatingActionButton(
-              onPressed: () => Get.toNamed('/create_post'),
+              onPressed: () => navController.goToCreatePost(),
               child: Icon(Icons.add),
             )
           : null,

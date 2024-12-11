@@ -6,4 +6,8 @@ class MasterNavController extends GetxController {
   void changeTabIndex(int index) {
     selectedIndex.value = index;
   }
+
+  void goToCreatePost() {
+    selectedIndex.value = 2;
+  }
 }

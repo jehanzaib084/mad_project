@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/authentication/controller/auth_controller.dart';
+import 'package:mad_project/authentication/view/intro_screen.dart';
+import 'package:mad_project/home_screens/master_nav/master_nav.dart';
 import 'package:mad_project/home_screens/posts_screens/controller/favorite_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
@@ -20,7 +22,7 @@ Future<void> main() async {
   );
 
   // Initialize controllers
-  Get.put(AuthController());
+  
   Get.put(FavoriteController());
 
   runApp(const MyApp());
@@ -39,12 +41,12 @@ class MyApp extends StatelessWidget {
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            Future.microtask(() => checkFirstLaunch());
-            return Container();
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasData) {
+            return MasterNav();
           } else {
-            Future.microtask(() => Get.offAllNamed('/masterNav'));
-            return Container();
+            return IntroScreen();
           }
         },
       ),
@@ -58,7 +60,6 @@ Future<void> checkFirstLaunch() async {
   final hasSeenIntro = prefs.getBool('hasSeenIntro') ?? false;
   Get.offAllNamed(hasSeenIntro ? '/login' : '/intro');
 }
-
 
 
 

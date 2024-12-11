@@ -43,14 +43,28 @@ class BasicInfoStep extends StatelessWidget {
         SizedBox(height: 16),
         TextFormField(
           controller: controller.descriptionController,
-          maxLines: 3,
+          maxLines: null, // Allow the field to expand
+          minLines: 1, // Start with one line
           decoration: InputDecoration(
             labelText: 'Description',
             border: OutlineInputBorder(),
           ),
           validator: (value) {
             if (value?.isEmpty ?? true) return 'Description is required';
+            if (value!.split(' ').length > 100)
+              return 'Description cannot exceed 100 words';
             return null;
+          },
+          onChanged: (value) {
+            if (value.split(' ').length > 100) {
+              controller.descriptionController.text =
+                  value.split(' ').take(100).join(' ');
+              controller.descriptionController.selection =
+                  TextSelection.fromPosition(
+                TextPosition(
+                    offset: controller.descriptionController.text.length),
+              );
+            }
           },
         ),
       ],

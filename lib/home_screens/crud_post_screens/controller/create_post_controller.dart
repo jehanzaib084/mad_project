@@ -210,61 +210,68 @@ class CreatePostController extends GetxController {
   }
 
   Future<void> submitForm() async {
-    if (!validateAllFields()) return;
+  if (!validateAllFields()) return;
 
-    try {
-      isLoading.value = true;
-      final user = FirebaseAuth.instance.currentUser;
+  try {
+    isLoading.value = true;
+    final user = FirebaseAuth.instance.currentUser;
 
-      if (user == null) {
-        Get.snackbar(
-          'Error',
-          'Please login to create a post',
-          backgroundColor: Colors.red.withOpacity(0.1),
-        );
-        return;
-      }
-
-      final postData = Post(
-        id: '',
-        propertyName: propertyNameController.text,
-        propertyType: propertyTypeController.text,
-        description: descriptionController.text,
-        images: base64Images,
-        garage: facilities['garage']?.value ?? false,
-        light: facilities['light']?.value ?? false,
-        water: facilities['water']?.value ?? false,
-        kitchen: facilities['kitchen']?.value ?? false,
-        gyser: facilities['gyser']?.value ?? false,
-        price: priceController.text,
-        rating: '0',
-        ownerPhone: phoneController.text,
-        location: locationController.text,
-        hasWifi: (features['hasWifi'] as RxBool).value,
-        mealsIncluded: (features['mealsIncluded'] as RxBool).value,
-        studentsPerRoom: (features['studentsPerRoom'] as RxInt).value,
-        reviews: [],
-        wifiDetails: (features['hasWifi'] as RxBool).value ? 'Available' : 'Not available',
-        mealDetails: (features['mealsIncluded'] as RxBool).value ? 'Included' : 'Not included',
-        gender: (features['gender'] as RxString).value,
-      ).toJson();
-
-      await FirebaseFirestore.instance.collection('posts').add(postData);
-
-      showSuccessMsg();
-
-      resetForm();
-      Get.back();
-    } catch (e) {
+    if (user == null) {
       Get.snackbar(
         'Error',
-        'Failed to create post: $e',
+        'Please login to create a post',
         backgroundColor: Colors.red.withOpacity(0.1),
       );
-    } finally {
-      isLoading.value = false;
+      return;
     }
+
+    final postRef = FirebaseFirestore.instance.collection('posts').doc();
+    final postId = postRef.id;
+    var time = DateTime.now().toIso8601String();
+
+    final postData = Post(
+      id: postId,
+      email: user.email ?? '',
+      propertyName: propertyNameController.text,
+      propertyType: propertyTypeController.text,
+      description: descriptionController.text,
+      images: base64Images,
+      garage: facilities['garage']?.value ?? false,
+      light: facilities['light']?.value ?? false,
+      water: facilities['water']?.value ?? false,
+      kitchen: facilities['kitchen']?.value ?? false,
+      gyser: facilities['gyser']?.value ?? false,
+      price: priceController.text,
+      rating: '0',
+      ownerPhone: phoneController.text,
+      location: locationController.text,
+      hasWifi: (features['hasWifi'] as RxBool).value,
+      mealsIncluded: (features['mealsIncluded'] as RxBool).value,
+      studentsPerRoom: (features['studentsPerRoom'] as RxInt).value,
+      reviews: [],
+      wifiDetails: (features['hasWifi'] as RxBool).value ? 'Available' : 'Not available',
+      mealDetails: (features['mealsIncluded'] as RxBool).value ? 'Included' : 'Not included',
+      gender: (features['gender'] as RxString).value,
+      userId: user.uid,
+      createdAt: time,
+    ).toJson();
+
+    await postRef.set(postData);
+
+    showSuccessMsg();
+
+    resetForm();
+    Get.back();
+  } catch (e) {
+    Get.snackbar(
+      'Error',
+      'Failed to create post: $e',
+      backgroundColor: Colors.red.withOpacity(0.1),
+    );
+  } finally {
+    isLoading.value = false;
   }
+}
 
   Future<void> showSuccessMsg() async {
     Get.snackbar(
@@ -272,6 +279,38 @@ class CreatePostController extends GetxController {
       'Post created successfully',
       backgroundColor: Colors.green.withOpacity(0.1),
     );
+  }
+
+  void _fetchUserPhoneNumber() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        final userData = userDoc.data();
+        if (userData != null && userData.containsKey('phoneNumber')) {
+          phoneController.text = userData['phoneNumber'];
+        }
+      }
+    }
+  }
+
+  void prefillData(Post post) {
+    propertyNameController.text = post.propertyName;
+    propertyTypeController.text = post.propertyType;
+    descriptionController.text = post.description;
+    priceController.text = post.price;
+    locationController.text = post.location;
+    phoneController.text = post.ownerPhone;
+    base64Images.value = post.images;
+    facilities['garage']?.value = post.garage;
+    facilities['light']?.value = post.light;
+    facilities['water']?.value = post.water;
+    facilities['kitchen']?.value = post.kitchen;
+    facilities['gyser']?.value = post.gyser;
+    features['hasWifi']?.value = post.hasWifi;
+    features['mealsIncluded']?.value = post.mealsIncluded;
+    features['studentsPerRoom']?.value = post.studentsPerRoom;
+    features['gender']?.value = post.gender;
   }
 
   bool validateAllFields() {

@@ -114,17 +114,23 @@ class PostsList extends StatelessWidget {
   }
 
   Widget _buildEmptyView() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.hourglass_empty, size: 60),
-          SizedBox(height: 16),
-          Text('No posts available'),
-        ],
-      ),
-    );
-  }
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.hourglass_empty, size: 60),
+        SizedBox(height: 16),
+        Text('No posts available'),
+        SizedBox(height: 16),
+        ElevatedButton.icon(
+          onPressed: postController.refreshPosts,
+          icon: Icon(Icons.refresh),
+          label: Text('Reload'),
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildLoadingIndicator() {
     return Padding(

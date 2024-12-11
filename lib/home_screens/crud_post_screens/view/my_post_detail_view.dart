@@ -1,10 +1,10 @@
-// my_post_detail_view.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
-// import 'package:carousel_slider/carousel_slider.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mad_project/home_screens/crud_post_screens/controller/create_post_controller.dart';
 
 class MyPostDetailView extends StatelessWidget {
   final Post post;
@@ -16,6 +16,16 @@ class MyPostDetailView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(post.propertyName),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () => _editPost(context),
+          ),
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () => _deletePost(context),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -204,5 +214,64 @@ class MyPostDetailView extends StatelessWidget {
             )),
       ],
     );
+  }
+
+  void _editPost(BuildContext context) {
+    final CreatePostController createPostController = Get.put(CreatePostController());
+    createPostController.propertyNameController.text = post.propertyName;
+    createPostController.propertyTypeController.text = post.propertyType;
+    createPostController.descriptionController.text = post.description;
+    createPostController.priceController.text = post.price;
+    createPostController.locationController.text = post.location;
+    createPostController.phoneController.text = post.ownerPhone;
+    createPostController.base64Images.value = post.images;
+    createPostController.facilities['garage']?.value = post.garage;
+    createPostController.facilities['light']?.value = post.light;
+    createPostController.facilities['water']?.value = post.water;
+    createPostController.facilities['kitchen']?.value = post.kitchen;
+    createPostController.facilities['gyser']?.value = post.gyser;
+    createPostController.features['hasWifi']?.value = post.hasWifi;
+    createPostController.features['mealsIncluded']?.value = post.mealsIncluded;
+    createPostController.features['studentsPerRoom']?.value = post.studentsPerRoom;
+    createPostController.features['gender']?.value = post.gender;
+
+    Get.toNamed('/create_post', arguments: post);
+  }
+
+  void _deletePost(BuildContext context) async {
+    final bool? result = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text('Delete Post'),
+        content: Text('Are you sure you want to delete this post?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: Text('Yes'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      try {
+        await FirebaseFirestore.instance.collection('posts').doc(post.id).delete();
+        Get.back();
+        Get.snackbar(
+          'Success',
+          'Post deleted successfully',
+          backgroundColor: Colors.green.withOpacity(0.1),
+        );
+      } catch (e) {
+        Get.snackbar(
+          'Error',
+          'Failed to delete post: $e',
+          backgroundColor: Colors.red.withOpacity(0.1),
+        );
+      }
+    }
   }
 }
