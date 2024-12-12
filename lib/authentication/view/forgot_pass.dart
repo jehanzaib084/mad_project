@@ -90,6 +90,13 @@ class Forgot extends StatelessWidget {
       extendBodyBehindAppBar: true,
       extendBody: true,
       appBar: AppBar(
+        title: const Text(
+            'Forgot Password',
+            style: TextStyle(
+              fontSize: 20,
+            ),
+          ),
+          centerTitle: true,
         elevation: 0,
       ),
       body: Container(
@@ -108,13 +115,6 @@ class Forgot extends StatelessWidget {
                   key: _formKey,
                   child: Column(
                     children: [
-                      const Text(
-                        'Forgot Password',
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                       const SizedBox(height: 10),
                       const Text(
                         'Worry not we are here to help :)',
@@ -131,7 +131,7 @@ class Forgot extends StatelessWidget {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          labelText: 'Email',
+                          hintText: 'Email',
                           prefixIcon: const Icon(Icons.email_outlined),
                         ),
                         validator: _authController.validateEmail,

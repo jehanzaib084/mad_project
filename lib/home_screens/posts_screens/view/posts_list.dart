@@ -13,41 +13,43 @@ import 'package:shimmer/shimmer.dart';
 class PostsList extends StatelessWidget {
   final PostController postController = Get.put(PostController());
   final FavoriteController favoriteController = Get.put(FavoriteController());
+  // Add GlobalKey for ListView
+  final GlobalKey<SliverAnimatedListState> _listKey = GlobalKey();
 
   PostsList({super.key});
 
   Widget _buildFilterTabs() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildFilterTab(PostFilter.recent, 'Recent', Icons.access_time),
-          _buildFilterTab(PostFilter.popular, 'Popular', Icons.trending_up),
-          _buildMoreFiltersButton(),
-        ],
-      ),
-    );
-  }
+  return Container(
+    padding: EdgeInsets.symmetric(vertical: 8),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildFilterTab(PostFilter.recent, 'Recent', Icons.access_time),
+        _buildFilterTab(PostFilter.popular, 'Popular', Icons.trending_up),
+        _buildFilterTab(PostFilter.hot, 'Hot Posts', Icons.local_fire_department),
+      ],
+    ),
+  );
+}
 
   Widget _buildFilterTab(PostFilter filter, String label, IconData icon) {
     return Obx(() {
       final isSelected = postController.currentFilter.value == filter;
       final isDisabled = postController.hasActiveDialogFilters;
-      
+
       return InkWell(
         onTap: isDisabled ? null : () => postController.changeFilter(filter),
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected && !isDisabled 
-                ? Colors.blue 
-                : Colors.white,
+            color: isSelected && !isDisabled ? Colors.blue : Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isDisabled 
-                  ? Colors.grey 
-                  : isSelected ? Colors.white : Colors.black,
+              color: isDisabled
+                  ? Colors.grey
+                  : isSelected
+                      ? Colors.white
+                      : Colors.black,
             ),
           ),
           child: Row(
@@ -55,17 +57,21 @@ class PostsList extends StatelessWidget {
               Icon(
                 icon,
                 size: 16,
-                color: isDisabled 
+                color: isDisabled
                     ? Colors.grey
-                    : isSelected ? Colors.white : Colors.blueGrey,
+                    : isSelected
+                        ? Colors.white
+                        : Colors.blueGrey,
               ),
               SizedBox(width: 4),
               Text(
                 label,
                 style: TextStyle(
-                  color: isDisabled 
+                  color: isDisabled
                       ? Colors.grey
-                      : isSelected ? Colors.white : Colors.blueGrey,
+                      : isSelected
+                          ? Colors.white
+                          : Colors.blueGrey,
                 ),
               ),
             ],
@@ -73,202 +79,6 @@ class PostsList extends StatelessWidget {
         ),
       );
     });
-  }
-
-  Widget _buildMoreFiltersButton() {
-    return Obx(() {
-      final hasActiveFilters =
-          postController.dialogFilters.values.any((v) => v) ||
-              postController.priceSort.value.isNotEmpty;
-      return InkWell(
-        onTap: () => _showFilterDialog(Get.context!),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: hasActiveFilters ? Colors.blue : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: hasActiveFilters ? Colors.white : Colors.black,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.tune,
-                size: 16,
-                color: hasActiveFilters ? Colors.white : Colors.blueGrey,
-              ),
-              SizedBox(width: 4),
-              Text(
-                'Filters',
-                style: TextStyle(
-                  color: hasActiveFilters ? Colors.white : Colors.blueGrey,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    });
-  }
-
-  void _showFilterDialog(BuildContext context) {
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        titlePadding: EdgeInsets.zero,
-        title: Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(15),
-              topRight: Radius.circular(15),
-            ),
-          ),
-          child: Text(
-            'Filter Options',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        content: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.85,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildFilterSection(
-                  context,
-                  'Price Sort',
-                  Obx(() => Column(
-                        children: [
-                          RadioListTile<String>(
-                            dense: true,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                            title: Text('Low to High',
-                                style: TextStyle(fontSize: 14)),
-                            value: 'asc',
-                            groupValue: postController.priceSort.value,
-                            onChanged: (val) =>
-                                postController.priceSort.value = val!,
-                          ),
-                          RadioListTile<String>(
-                            dense: true,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                            title: Text('High to Low',
-                                style: TextStyle(fontSize: 14)),
-                            value: 'desc',
-                            groupValue: postController.priceSort.value,
-                            onChanged: (val) =>
-                                postController.priceSort.value = val!,
-                          ),
-                        ],
-                      )),
-                ),
-                SizedBox(height: 12),
-                _buildFilterSection(
-                  context,
-                  'Facilities',
-                  Column(
-                    children: postController.dialogFilters.entries
-                        .map(
-                          (e) => Obx(() => CheckboxListTile(
-                                dense: true,
-                                contentPadding:
-                                    EdgeInsets.symmetric(horizontal: 8),
-                                title: Text(
-                                  e.key.capitalizeFirst!,
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                                value: postController.dialogFilters[e.key],
-                                onChanged: (val) =>
-                                    postController.dialogFilters[e.key] = val!,
-                              )),
-                        )
-                        .toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        actionsPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton(
-                onPressed: () {
-                  postController.dialogFilters.updateAll((key, value) => false);
-                  postController.priceSort.value = '';
-                  Get.back();
-                  postController.refreshPosts();
-                },
-                child: Text('Clear All'),
-              ),
-              Row(
-                children: [
-                  TextButton(
-                    onPressed: () => Get.back(),
-                    child: Text('Cancel'),
-                  ),
-                  SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Clear tab filters when applying dialog filters
-                      postController.currentFilter.value = PostFilter.recent;
-                      Get.back();
-                      postController.refreshPosts();
-                    },
-                    child: Text('Apply'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterSection(
-      BuildContext context, String title, Widget content) {
-    return Card(
-      elevation: 0,
-      color: Colors.grey[100],
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(left: 8, bottom: 4),
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-            ),
-            content,
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -279,7 +89,8 @@ class PostsList extends StatelessWidget {
         actions: [
           Obx(() => GestureDetector(
                 onTap: () {
-                  if (postController.currentCity.value == 'Location Unavailable') {
+                  if (postController.currentCity.value ==
+                      'Location Unavailable') {
                     Get.snackbar(
                       'Location Disabled',
                       'Please enable location services.',
@@ -339,13 +150,20 @@ class PostsList extends StatelessWidget {
                     return false;
                   },
                   child: ListView.builder(
-                    itemCount: postController.allPosts.length + 1,
+                    key: _listKey, // Add GlobalKey
+                    itemCount: postController.allPosts.length +
+                        (postController.hasMorePosts.value ? 3 : 0),
+                    addAutomaticKeepAlives: true, // Add this
                     itemBuilder: (context, index) {
-                      if (index == postController.allPosts.length) {
-                        return _buildLoadingIndicator();
+                      if (index >= postController.allPosts.length) {
+                        return _buildLoadingShimmerItem();
                       }
                       final post = postController.allPosts[index];
-                      return _buildPostCard(post);
+                      return KeyedSubtree(
+                        // Wrap item with KeyedSubtree
+                        key: ValueKey(post.id),
+                        child: _buildPostCard(post),
+                      );
                     },
                   ),
                 );
@@ -360,22 +178,8 @@ class PostsList extends StatelessWidget {
   Widget _buildLoadingShimmer() {
     return ListView.builder(
       itemCount: 3,
-      itemBuilder: (_, __) => Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15.0),
-            ),
-            child: SizedBox(
-              height: 300,
-              width: double.infinity,
-            ),
-          ),
-        ),
-      ),
+      padding: const EdgeInsets.all(8.0),
+      itemBuilder: (context, index) => _buildLoadingShimmerItem(),
     );
   }
 
@@ -535,4 +339,78 @@ class PostsList extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _buildLoadingShimmerItem() {
+  return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(15),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      height: 20,
+                      width: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      height: 16,
+                      width: 150,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      height: 18,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ));
 }

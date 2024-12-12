@@ -1,4 +1,6 @@
+// post_detail_view.dart
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
@@ -10,7 +12,7 @@ import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
 import 'package:mad_project/home_screens/posts_screens/view/reviews_list.dart';
 
 class PostDetailView extends StatelessWidget {
-  final Post post;
+  final Rx<Post> rxPost;
   final bool isLoved;
   final VoidCallback onLoveToggle;
   final PostController controller = Get.find<PostController>();
@@ -18,11 +20,25 @@ class PostDetailView extends StatelessWidget {
   final RxBool isDescriptionExpanded = false.obs;
 
   PostDetailView({
-    required this.post,
+    required Post post,
     required this.isLoved,
     required this.onLoveToggle,
     super.key,
-  });
+  }) : rxPost = Rx<Post>(post) {
+    // Start listening to post updates
+    FirebaseFirestore.instance
+        .collection('posts')
+        .doc(post.id)
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.exists) {
+        rxPost.value = Post.fromJson(snapshot.data() as Map<String, dynamic>);
+      }
+    });
+  }
+
+  Post get post => rxPost.value;
+
 
   Widget _buildDescription(BuildContext context) {
     final descriptionWords = post.description.split(' ');
@@ -159,7 +175,7 @@ class PostDetailView extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${post.price} - ${post.propertyType}',
+                    'Rs. ${post.price}/month - ${post.propertyType}',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: Theme.of(context).primaryColor,
                         ),
@@ -236,12 +252,12 @@ class PostDetailView extends StatelessWidget {
                   const Divider(),
 
                   // Reviews Section
-                  ListTile(
-                    title: Text('Reviews (${post.reviews.length})'),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () =>
-                        Get.to(() => ReviewsList(reviews: post.reviews)),
-                  ),
+                  Obx(() => ListTile(
+    title: Text('Reviews (${rxPost.value.reviews.length})'),
+    subtitle: Text('Average Rating: ${rxPost.value.rating}'),
+    trailing: Icon(Icons.arrow_forward),
+    onTap: () => Get.to(() => ReviewsList(post: rxPost.value)),
+  )),
                 ],
               ),
             ),

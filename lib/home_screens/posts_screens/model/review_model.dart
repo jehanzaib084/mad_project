@@ -1,5 +1,3 @@
-// lib/home_screens/posts_screens/model/review_model.dart
-
 class Review {
   final String userId;
   final String userName;
@@ -37,5 +35,12 @@ class Review {
       'rating': rating,
       'date': date,
     };
+  }
+
+  String get formattedDate {
+    final dateTime = DateTime.parse(date);
+    final time = '${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}${dateTime.hour >= 12 ? 'pm' : 'am'}';
+    final day = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    return '$time - $day';
   }
 }

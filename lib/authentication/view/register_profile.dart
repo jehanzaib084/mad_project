@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/assets.dart';
 import 'package:mad_project/authentication/controller/auth_controller.dart';
@@ -45,8 +47,14 @@ class ProfileUpdateScreen extends StatelessWidget {
         extendBodyBehindAppBar: true,
         extendBody: true,
         appBar: AppBar(
+          title: const Text(
+            'Profile',
+            style: TextStyle(
+              fontSize: 20,
+            ),
+          ),
+          centerTitle: true,
           elevation: 0,
-          foregroundColor: Colors.black,
         ),
         body: Container(
           height: MediaQuery.of(context).size.height,
@@ -63,20 +71,6 @@ class ProfileUpdateScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   children: [
-                    const Text(
-                      'Profile',
-                      style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Assets.primaryColor),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Kindly complete your profile',
-                      textAlign: TextAlign.center,
-                      style:
-                          TextStyle(fontSize: 16, color: Assets.lightTextColor),
-                    ),
                     const SizedBox(height: 32),
                     GestureDetector(
                       onTap: () {
@@ -114,11 +108,18 @@ class ProfileUpdateScreen extends StatelessWidget {
                         );
                       }),
                     ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Kindly complete your profile',
+                      textAlign: TextAlign.center,
+                      style:
+                          TextStyle(fontSize: 16, color: Assets.lightTextColor),
+                    ),
                     const SizedBox(height: 32),
                     TextField(
                       controller: _firstNameController,
                       decoration: InputDecoration(
-                        labelText: 'First Name',
+                        hintText: 'First Name',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -130,7 +131,7 @@ class ProfileUpdateScreen extends StatelessWidget {
                     TextField(
                       controller: _lastNameController,
                       decoration: InputDecoration(
-                        labelText: 'Last Name',
+                        hintText: 'Last Name',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -142,7 +143,7 @@ class ProfileUpdateScreen extends StatelessWidget {
                     TextField(
                       controller: _ageController,
                       decoration: InputDecoration(
-                        labelText: 'Age',
+                        hintText: 'Age',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -154,13 +155,31 @@ class ProfileUpdateScreen extends StatelessWidget {
                     TextField(
                       controller: _phoneNumberController,
                       decoration: InputDecoration(
-                        labelText: 'Phone Number',
+                        hintText: 'Phone Number',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
+                        prefixText: '+92 ',
                         prefixIcon: const Icon(Icons.phone_outlined),
                       ),
                       keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
+                      onChanged: (value) {
+                        // Remove any non-digits and limit to 10 digits
+                        final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+                        if (digits != value) {
+                          _phoneNumberController.text =
+                              digits.substring(0, min(digits.length, 10));
+                          _phoneNumberController.selection =
+                              TextSelection.fromPosition(
+                            TextPosition(
+                                offset: _phoneNumberController.text.length),
+                          );
+                        }
+                      },
                     ),
                     const SizedBox(height: 32),
                     SizedBox(

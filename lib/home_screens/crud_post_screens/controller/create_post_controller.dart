@@ -44,7 +44,7 @@ class CreatePostController extends GetxController {
 
   final base64Images = <String>[].obs;
   final selectedImages = <File>[].obs;
-  static const int maxImages = 10;
+  static const int maxImages = 3;
 
   final currentImageIndex = 0.obs;
   bool isEditMode = false;

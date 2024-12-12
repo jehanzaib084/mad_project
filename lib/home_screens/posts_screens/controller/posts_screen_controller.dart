@@ -1,14 +1,15 @@
-// import 'dart:convert';
+// post_screen_controller.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
+import 'package:mad_project/home_screens/posts_screens/model/review_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum PostFilter { recent, popular, nearby }
+enum PostFilter { recent, popular, hot }
 
 class PostController extends GetxController {
   final RxBool isLoading = false.obs;
@@ -23,7 +24,7 @@ class PostController extends GetxController {
   final PageController dialogPageController = PageController();
   final RxInt currentPage = 0.obs;
 
-  final int pageSize = 2;
+  final int pageSize = 4;
   DocumentSnapshot? lastDocument;
 
   final Rx<PostFilter> currentFilter = PostFilter.recent.obs;
@@ -44,7 +45,13 @@ class PostController extends GetxController {
   bool get hasActiveDialogFilters =>
       dialogFilters.values.any((v) => v) || priceSort.value.isNotEmpty;
 
-  @override 
+  User? get currentUser => FirebaseAuth.instance.currentUser;
+
+  final RxBool isSubmittingReview = false.obs;
+
+  final Rx<List<Review>> currentPostReviews = Rx<List<Review>>([]);
+
+  @override
   void onInit() {
     super.onInit();
     currentCity.value = 'Lahore'; // Set default
@@ -60,6 +67,16 @@ class PostController extends GetxController {
         getCurrentLocation();
       }
     });
+  }
+
+  final RxBool isLoadingMore = false.obs;
+
+  Future<void> loadMorePosts() async {
+    if (!hasMorePosts.value || isLoadingMore.value) return;
+
+    isLoadingMore.value = true;
+    await loadPosts();
+    isLoadingMore.value = false;
   }
 
   // Initialize data, load posts once
@@ -87,31 +104,21 @@ class PostController extends GetxController {
 
       Query query = FirebaseFirestore.instance.collection('posts');
 
-      // Apply base query based on active filter type
-      if (hasActiveDialogFilters) {
-        // Apply dialog filters
-        if (priceSort.value.isNotEmpty) {
-          query = query.orderBy('price', descending: priceSort.value == 'desc');
-        }
-
-        // Apply facility filters
-        dialogFilters.forEach((facility, isEnabled) {
-          if (isEnabled) {
-            query = query.where(facility, isEqualTo: true);
-          }
-        });
-      } else {
-        // Apply tab filters
-        switch (currentFilter.value) {
-          case PostFilter.recent:
-            query = query.orderBy('createdAt', descending: true);
-            break;
-          case PostFilter.popular:
-            query = query.orderBy('views', descending: true);
-            break;
-          case PostFilter.nearby:
-            // TODO: Handle this case.
-        }
+// Apply filters
+      switch (currentFilter.value) {
+        case PostFilter.recent:
+          query = query.orderBy('createdAt', descending: true);
+          break;
+        case PostFilter.popular:
+          query = query
+              .where('rating', isGreaterThan: '0.0')
+              .orderBy('rating', descending: true);
+          break;
+        case PostFilter.hot:
+          query = query
+              .where('views', isGreaterThan: 0)
+              .orderBy('views', descending: true);
+          break;
       }
 
       query = query.limit(pageSize);
@@ -120,10 +127,9 @@ class PostController extends GetxController {
       }
 
       final querySnapshot = await query.get();
-
-      final List<Post> newPosts = querySnapshot.docs.map((doc) {
-        return Post.fromJson(doc.data() as Map<String, dynamic>);
-      }).toList();
+      final List<Post> newPosts = querySnapshot.docs
+          .map((doc) => Post.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
 
       if (newPosts.isNotEmpty) {
         lastDocument = querySnapshot.docs.last;
@@ -142,12 +148,6 @@ class PostController extends GetxController {
 
   Future<void> refreshPosts() async {
     await loadPosts(isRefresh: true);
-  }
-
-  Future<void> loadMorePosts() async {
-    if (!isLoading.value) {
-      await loadPosts();
-    }
   }
 
   // Getter for the number of posts
@@ -172,10 +172,30 @@ class PostController extends GetxController {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    // Don't increment if user already viewed or is post owner
-    if (post.viewedBy.contains(user.uid) || post.userId == user.uid) return;
+    // First check: Don't increment if user is owner or has viewed
+    if (post.userId == user.uid) {
+      print('Post owner viewing - no increment');
+      return;
+    }
 
     try {
+      // Get latest post data to ensure accurate viewedBy check
+      final postDoc = await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(post.id)
+          .get();
+
+      if (!postDoc.exists) return;
+
+      final currentPost = Post.fromJson(postDoc.data() as Map<String, dynamic>);
+
+      // Second check: Verify user hasn't already viewed
+      if (currentPost.viewedBy.contains(user.uid)) {
+        print('User already viewed - no increment');
+        return;
+      }
+
+      // If checks pass, increment view and add user to viewedBy
       await FirebaseFirestore.instance.collection('posts').doc(post.id).update({
         'views': FieldValue.increment(1),
         'viewedBy': FieldValue.arrayUnion([user.uid])
@@ -211,7 +231,7 @@ class PostController extends GetxController {
         position.latitude,
         position.longitude,
       );
-      
+
       if (placemarks.isNotEmpty) {
         currentCity.value = placemarks.first.locality ?? 'Lahore';
       }
@@ -268,47 +288,141 @@ class PostController extends GetxController {
 
   // Launch WhatsApp
   // Update launchWhatsApp method in PostController
-Future<void> launchWhatsApp(String phoneNumber) async {
-  // Format phone number (remove any spaces or special characters)
-  final formattedNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
-  
-  // Create WhatsApp URLs for different scenarios
-  final whatsappUrlAndroid = Uri.parse(
-    "whatsapp://send?phone=+92$formattedNumber&text=Hello, I am interested in your property listing."
-  );
-  final whatsappUrlWeb = Uri.parse(
-    'https://wa.me/92$formattedNumber?text=Hello, I am interested in your property listing.'
-  );
+  Future<void> launchWhatsApp(String phoneNumber) async {
+    // Format phone number (remove any spaces or special characters)
+    final formattedNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
 
-  try {
-    // Try launching WhatsApp app first
-    if (await canLaunchUrl(whatsappUrlAndroid)) {
-      await launchUrl(whatsappUrlAndroid);
-    } 
-    // If app launch fails, try web version
-    else if (await canLaunchUrl(whatsappUrlWeb)) {
-      await launchUrl(whatsappUrlWeb);
-    } 
-    // If both fail, show error
-    else {
+    // Create WhatsApp URLs for different scenarios
+    final whatsappUrlAndroid = Uri.parse(
+        "whatsapp://send?phone=+92$formattedNumber&text=Hello, I am interested in your property listing.");
+    final whatsappUrlWeb = Uri.parse(
+        'https://wa.me/92$formattedNumber?text=Hello, I am interested in your property listing.');
+
+    try {
+      // Try launching WhatsApp app first
+      if (await canLaunchUrl(whatsappUrlAndroid)) {
+        await launchUrl(whatsappUrlAndroid);
+      }
+      // If app launch fails, try web version
+      else if (await canLaunchUrl(whatsappUrlWeb)) {
+        await launchUrl(whatsappUrlWeb);
+      }
+      // If both fail, show error
+      else {
+        Get.snackbar(
+          'Error',
+          'WhatsApp is not installed',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withOpacity(0.1),
+          duration: Duration(seconds: 2),
+        );
+      }
+    } catch (e) {
       Get.snackbar(
         'Error',
-        'WhatsApp is not installed',
+        'Could not launch WhatsApp',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.withOpacity(0.1),
         duration: Duration(seconds: 2),
       );
     }
-  } catch (e) {
-    Get.snackbar(
-      'Error',
-      'Could not launch WhatsApp',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red.withOpacity(0.1),
-      duration: Duration(seconds: 2),
-    );
   }
-}
+
+  Future<void> updatePostRating(String postId) async {
+    try {
+      final postRef =
+          FirebaseFirestore.instance.collection('posts').doc(postId);
+      final postDoc = await postRef.get();
+      final post = Post.fromJson(postDoc.data() as Map<String, dynamic>);
+
+      if (post.reviews.isEmpty) {
+        await postRef.update({'rating': '0.0'});
+        return;
+      }
+
+      double totalRating =
+          post.reviews.map((r) => r.rating).reduce((a, b) => a + b);
+      double averageRating = totalRating / post.reviews.length;
+
+      await postRef.update({'rating': averageRating.toStringAsFixed(1)});
+    } catch (e) {
+      print('Error updating post rating: $e');
+    }
+  }
+
+  Future<bool> addReview(String postId, Review review) async {
+    try {
+      final postRef =
+          FirebaseFirestore.instance.collection('posts').doc(postId);
+
+      // Add review
+      await postRef.update({
+        'reviews': FieldValue.arrayUnion([review.toJson()]),
+      });
+
+      // Update average rating
+      await updatePostRating(postId);
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<void> recalculateRating(String postId) async {
+    try {
+      final postRef =
+          FirebaseFirestore.instance.collection('posts').doc(postId);
+      final postDoc = await postRef.get();
+      final post = Post.fromJson(postDoc.data() as Map<String, dynamic>);
+
+      if (post.reviews.isEmpty) {
+        await postRef.update({'rating': '0.0'});
+        return;
+      }
+
+      double totalRating =
+          post.reviews.map((r) => r.rating).reduce((a, b) => a + b);
+      double averageRating = totalRating / post.reviews.length;
+
+      await postRef.update({'rating': averageRating.toStringAsFixed(1)});
+    } catch (e) {
+      print('Error recalculating rating: $e');
+    }
+  }
+
+  Future<void> refreshPostById(String postId) async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(postId)
+          .get();
+
+      if (doc.exists) {
+        final index = allPosts.indexWhere((post) => post.id == postId);
+        if (index != -1) {
+          allPosts[index] = Post.fromJson(doc.data() as Map<String, dynamic>);
+          update();
+        }
+      }
+    } catch (e) {
+      print('Error refreshing post: $e');
+    }
+  }
+
+  Future<void> startReviewsStream(String postId) async {
+    FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.exists) {
+        final post = Post.fromJson(snapshot.data() as Map<String, dynamic>);
+        currentPostReviews.value = post.reviews;
+        updatePostRating(postId); // Ensure rating is updated reactively
+      }
+    });
+  }
 
   @override
   void dispose() {

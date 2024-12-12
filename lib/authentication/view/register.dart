@@ -101,7 +101,7 @@ class Register extends StatelessWidget {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          labelText: 'Email',
+                          hintText: 'Email',
                           prefixIcon: const Icon(Icons.email_outlined),
                         ),
                         validator: _authController.validateEmail,
@@ -116,7 +116,7 @@ class Register extends StatelessWidget {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            labelText: 'Password',
+                            hintText: 'Password',
                             prefixIcon: const Icon(Icons.lock_outline_rounded),
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -143,7 +143,7 @@ class Register extends StatelessWidget {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            labelText: 'Confirm Password',
+                            hintText: 'Confirm Password',
                             prefixIcon: const Icon(Icons.lock_outline_rounded),
                             suffixIcon: IconButton(
                               icon: Icon(

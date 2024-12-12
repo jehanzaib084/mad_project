@@ -49,11 +49,11 @@ class Post {
     required this.hasWifi,
     required this.mealsIncluded,
     required this.studentsPerRoom,
-    required this.reviews,
     required this.wifiDetails,
     required this.mealDetails,
     required this.gender,
     required this.createdAt,
+    this.reviews = const [],
     this.views = 0,
     this.viewedBy = const [],
   });
@@ -79,7 +79,9 @@ class Post {
       hasWifi: json['hasWifi'] ?? false,
       mealsIncluded: json['mealsIncluded'] ?? false,
       studentsPerRoom: json['studentsPerRoom'] ?? 1,
-      reviews: (json['reviews'] as List?)?.map((review) => Review.fromJson(review)).toList() ?? [],
+      reviews: (json['reviews'] as List<dynamic>?)
+          ?.map((review) => Review.fromJson(review))
+          .toList() ?? [],
       wifiDetails: json['wifiDetails']?.toString() ?? 'Not available',
       mealDetails: json['mealDetails']?.toString() ?? 'Not included',
       gender: json['gender']?.toString() ?? 'boys',
@@ -118,5 +120,9 @@ class Post {
       'views': views,
       'viewedBy': viewedBy,
     };
+  }
+
+  void addReview(Review review) {
+    reviews.add(review);
   }
 }
