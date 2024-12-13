@@ -23,68 +23,109 @@ class MasterNav extends StatelessWidget {
     ];
 
     return Scaffold(
-        extendBodyBehindAppBar: true,
-        extendBody: true,
-        backgroundColor: Colors.transparent,
-        body: Stack(children: [
+      extendBodyBehindAppBar: true,
+      extendBody: true,
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
           Positioned.fill(
-            bottom:
-                kBottomNavigationBarHeight,
+            bottom: kBottomNavigationBarHeight,
             child: Obx(() => screens[navController.selectedIndex.value]),
           ),
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            child: Obx(() => Container(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.2),
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
-                  child: BottomNavigationBar(
-                    currentIndex: navController.selectedIndex.value,
-                    onTap: navController.changeTabIndex,
-                    type: BottomNavigationBarType.fixed,
-                    backgroundColor: Colors.white,
-                    selectedItemColor: Assets.btnBgColor,
-                    unselectedItemColor: Colors.grey,
-                    selectedLabelStyle: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
+            child: Obx(() {
+              final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+              return Container(
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.black : Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDarkMode
+                          ? Colors.white.withOpacity(0.2)
+                          : Colors.grey.withOpacity(0.2),
+                      blurRadius: 10,
                     ),
-                    unselectedLabelStyle: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                    items: [
-                      _buildNavItem(Icons.home_outlined, Icons.home, "Home"),
-                      _buildNavItem(
-                          Icons.favorite_border, Icons.favorite, "Favorites"),
-                      _buildNavItem(
-                          Icons.add_circle_outline, Icons.add_circle, "Create"),
-                      _buildNavItem(
-                          Icons.article_outlined, Icons.article, "My Posts"),
-                      _buildNavItem(
-                          Icons.settings_outlined, Icons.settings, "Settings"),
-                    ],
+                  ],
+                ),
+                child: BottomNavigationBar(
+                  currentIndex: navController.selectedIndex.value,
+                  onTap: navController.changeTabIndex,
+                  type: BottomNavigationBarType.fixed,
+                  // backgroundColor: Colors.transparent, // Handled by Container
+                  selectedItemColor: isDarkMode
+                      ? Assets.btnBgColor.withOpacity(0.9)
+                      : Assets.btnBgColor,
+                  unselectedItemColor:
+                      isDarkMode ? Colors.white70 : Colors.grey,
+                  selectedLabelStyle: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
                   ),
-                )),
-          )
-        ]));
+                  unselectedLabelStyle: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                  items: [
+                    _buildNavItem(
+                      Icons.home_outlined,
+                      Icons.home,
+                      "Home",
+                      isDarkMode,
+                    ),
+                    _buildNavItem(
+                      Icons.favorite_border,
+                      Icons.favorite,
+                      "Favorites",
+                      isDarkMode,
+                    ),
+                    _buildNavItem(
+                      Icons.add_circle_outline,
+                      Icons.add_circle,
+                      "Create",
+                      isDarkMode,
+                    ),
+                    _buildNavItem(
+                      Icons.article_outlined,
+                      Icons.article,
+                      "My Posts",
+                      isDarkMode,
+                    ),
+                    _buildNavItem(
+                      Icons.settings_outlined,
+                      Icons.settings,
+                      "Settings",
+                      isDarkMode,
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
   }
 
   BottomNavigationBarItem _buildNavItem(
     IconData unselectedIcon,
     IconData selectedIcon,
     String label,
+    bool isDarkMode,
   ) {
     return BottomNavigationBarItem(
-      icon: Icon(unselectedIcon),
-      activeIcon: Icon(selectedIcon),
+      icon: Icon(
+        unselectedIcon,
+        color: isDarkMode ? Colors.white70 : Colors.grey,
+      ),
+      activeIcon: Icon(
+        selectedIcon,
+        color: isDarkMode
+            ? Assets.btnBgColor.withOpacity(0.9)
+            : Assets.btnBgColor,
+      ),
       label: label,
     );
   }

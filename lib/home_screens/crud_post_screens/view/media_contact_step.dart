@@ -92,8 +92,9 @@ class MediaContactStep extends StatelessWidget {
                                 child: GestureDetector(
                                   onTap: () {
                                     controller.removeImage(index);
-                                    if (controller.selectedImages.isEmpty)
+                                    if (controller.selectedImages.isEmpty) {
                                       return;
+                                    }
                                     if (index ==
                                         controller.selectedImages.length) {
                                       pageController.jumpToPage(index - 1);

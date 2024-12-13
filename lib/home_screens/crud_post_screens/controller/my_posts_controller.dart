@@ -17,4 +17,10 @@ class MyPostDetailController extends GetxController {
     pageController.dispose();
     super.dispose();
   }
+
+  @override
+  void onClose() {
+    pageController.dispose();
+    super.onClose();
+  }
 }

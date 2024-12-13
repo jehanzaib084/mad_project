@@ -19,18 +19,19 @@ class PostsList extends StatelessWidget {
   PostsList({super.key});
 
   Widget _buildFilterTabs() {
-  return Container(
-    padding: EdgeInsets.symmetric(vertical: 8),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildFilterTab(PostFilter.recent, 'Recent', Icons.access_time),
-        _buildFilterTab(PostFilter.popular, 'Popular', Icons.trending_up),
-        _buildFilterTab(PostFilter.hot, 'Hot Posts', Icons.local_fire_department),
-      ],
-    ),
-  );
-}
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildFilterTab(PostFilter.recent, 'Recent', Icons.access_time),
+          _buildFilterTab(PostFilter.popular, 'Popular', Icons.trending_up),
+          _buildFilterTab(
+              PostFilter.hot, 'Hot Posts', Icons.local_fire_department),
+        ],
+      ),
+    );
+  }
 
   Widget _buildFilterTab(PostFilter filter, String label, IconData icon) {
     return Obx(() {
@@ -42,14 +43,18 @@ class PostsList extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected && !isDisabled ? Colors.blue : Colors.white,
+            color: isSelected && !isDisabled
+                ? Colors.blue
+                : (Get.isDarkMode
+                    ? Colors.black
+                    : Colors.white),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isDisabled
                   ? Colors.grey
                   : isSelected
-                      ? Colors.white
-                      : Colors.black,
+                            ? Colors.white
+                            : (Get.isDarkMode ? Colors.white : Colors.black),
             ),
           ),
           child: Row(
@@ -59,9 +64,9 @@ class PostsList extends StatelessWidget {
                 size: 16,
                 color: isDisabled
                     ? Colors.grey
-                    : isSelected
-                        ? Colors.white
-                        : Colors.blueGrey,
+                    :  isSelected
+                            ? Colors.white
+                            : (Get.isDarkMode ? Colors.white : Colors.black),
               ),
               SizedBox(width: 4),
               Text(
@@ -69,9 +74,9 @@ class PostsList extends StatelessWidget {
                 style: TextStyle(
                   color: isDisabled
                       ? Colors.grey
-                      : isSelected
-                          ? Colors.white
-                          : Colors.blueGrey,
+                      :  isSelected
+                            ? Colors.white
+                            : (Get.isDarkMode ? Colors.white : Colors.black),
                 ),
               ),
             ],
@@ -109,8 +114,6 @@ class PostsList extends StatelessWidget {
                         postController.currentCity.value,
                         style: TextStyle(
                           fontSize: 16,
-                          // color: Colors.white,
-                          // decoration: TextDecoration.underline,
                         ),
                       ),
                     ],
@@ -177,7 +180,7 @@ class PostsList extends StatelessWidget {
 
   Widget _buildLoadingShimmer() {
     return ListView.builder(
-      itemCount: 3,
+      itemCount: 1,
       padding: const EdgeInsets.all(8.0),
       itemBuilder: (context, index) => _buildLoadingShimmerItem(),
     );
@@ -216,15 +219,6 @@ class PostsList extends StatelessWidget {
             label: Text('Reload'),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildLoadingIndicator() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Center(
-        child: CircularProgressIndicator(),
       ),
     );
   }

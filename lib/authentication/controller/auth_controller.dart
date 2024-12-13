@@ -40,7 +40,12 @@ class AuthController extends GetxController {
     try {
       await _auth.currentUser?.sendEmailVerification();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to send verification email');
+      Get.snackbar(
+        'Error',
+        'Failed to send verification email',
+        backgroundColor: Colors.red.withOpacity(0.5),
+        colorText: Colors.white,
+      );
     }
   }
 
@@ -64,7 +69,8 @@ class AuthController extends GetxController {
         Get.snackbar(
           'Account Deleted',
           'Your unverified account has been deleted. Please register again.',
-          backgroundColor: Colors.blue[100],
+          backgroundColor: Colors.blue.withOpacity(0.5),
+          colorText: Colors.white,
         );
       }
     } catch (e) {
@@ -91,7 +97,9 @@ class AuthController extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('hasSeenIntro', true);
     } on FirebaseAuthException catch (e) {
-      Get.snackbar('Error', e.message ?? 'Sign up failed');
+      Get.snackbar('Error', e.message ?? 'Sign up failed',
+          backgroundColor: Colors.red.withOpacity(0.5),
+          colorText: Colors.white,);
     } finally {
       isLoading.value = false;
     }
@@ -110,8 +118,8 @@ class AuthController extends GetxController {
         Get.snackbar(
           'Error',
           'Please verify your email first',
-          backgroundColor: Colors.red[100],
-          colorText: Colors.red[900],
+          backgroundColor: Colors.red.withOpacity(0.5),
+          colorText: Colors.white,
         );
         await sendEmailVerification();
         return;
@@ -128,7 +136,9 @@ class AuthController extends GetxController {
 
       Get.offAllNamed('/masterNav');
     } on FirebaseAuthException catch (e) {
-      Get.snackbar('Error', e.message ?? 'Login failed');
+      Get.snackbar('Error', e.message ?? 'Login failed',
+          backgroundColor: Colors.red.withOpacity(0.5),
+          colorText: Colors.white,);
     } finally {
       isLoading.value = false;
     }
@@ -196,10 +206,10 @@ class AuthController extends GetxController {
                                 await sendEmailVerification();
                                 startResendTimer();
                                 Get.snackbar(
-                                  'Success',
-                                  'Verification email sent again',
-                                  backgroundColor: Colors.green[100],
-                                );
+                                    'Success', 'Verification email sent again',
+                                    backgroundColor:
+                                        Colors.green.withOpacity(0.5),
+                                        colorText: Colors.white,);
                               }
                             : null,
                         style: ElevatedButton.styleFrom(
@@ -315,9 +325,16 @@ class AuthController extends GetxController {
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
-      Get.snackbar('Success', 'Password reset email sent');
+      Get.snackbar('Success', 'Password reset email sent',
+          backgroundColor: Colors.green.withOpacity(0.5),
+          colorText: Colors.white,);
     } on FirebaseAuthException catch (e) {
-      Get.snackbar('Error', e.message ?? 'Failed to send password reset email');
+      Get.snackbar(
+        'Error',
+        e.message ?? 'Failed to send password reset email',
+        backgroundColor: Colors.red.withOpacity(0.5),
+        colorText: Colors.white,
+      );
     }
   }
 

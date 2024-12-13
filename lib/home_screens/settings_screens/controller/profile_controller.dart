@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,7 +41,7 @@ class ProfileController extends GetxController {
         }
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load user data');
+      Get.snackbar('Error', 'Failed to load user data', backgroundColor: Colors.red.withOpacity(0.5), colorText: Colors.white,);
     } finally {
       isLoading.value = false;
     }
@@ -57,9 +58,9 @@ class ProfileController extends GetxController {
       await prefs.setString('email', updatedUser.email);
       await prefs.setString('profilePicUrl', updatedUser.profilePicUrl);
       userModel.value = updatedUser;
-      Get.snackbar('Success', 'Profile updated successfully');
+      Get.snackbar('Success', 'Profile updated successfully', backgroundColor: Colors.green.withOpacity(0.5), colorText: Colors.white,);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update profile');
+      Get.snackbar('Error', 'Failed to update profile', backgroundColor: Colors.red.withOpacity(0.5), colorText: Colors.white,);
     }
   }
 
@@ -79,7 +80,7 @@ class ProfileController extends GetxController {
         userModel.value = user;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch user data');
+      Get.snackbar('Error', 'Failed to fetch user data', backgroundColor: Colors.red.withOpacity(0.5), colorText: Colors.white,);
     }
   }
 
@@ -101,7 +102,8 @@ class ProfileController extends GetxController {
       await _auth.signOut();
       Get.offAllNamed('/login');
     } catch (e) {
-      Get.snackbar('Error', 'Failed to log out');
+      Get.snackbar('Error', 'Failed to log out', backgroundColor: Colors.red.withOpacity(0.5), colorText: Colors.white,);
     }
   }
+
 }

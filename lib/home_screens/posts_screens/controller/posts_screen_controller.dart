@@ -84,7 +84,9 @@ class PostController extends GetxController {
     try {
       await loadPosts(); // Load posts directly, no pagination needed
     } catch (e) {
-      Get.snackbar('Error initializing data: $e', 'We are very sorry');
+      Get.snackbar('Error initializing data: $e', 'We are very sorry',
+          backgroundColor: Colors.red.withOpacity(0.5),
+          colorText: Colors.white,);
     }
   }
 
@@ -139,7 +141,7 @@ class PostController extends GetxController {
       }
     } catch (e) {
       error.value = 'Failed to load posts: $e';
-      Get.snackbar('Error', 'Failed to load posts');
+      Get.snackbar('Error', 'Failed to load posts', backgroundColor: Colors.red.withOpacity(0.5),colorText: Colors.white,);
     } finally {
       isLoading.value = false;
       update();
@@ -312,18 +314,16 @@ class PostController extends GetxController {
         Get.snackbar(
           'Error',
           'WhatsApp is not installed',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withOpacity(0.1),
-          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red.withOpacity(0.5),
+          colorText: Colors.white,
         );
       }
     } catch (e) {
       Get.snackbar(
         'Error',
         'Could not launch WhatsApp',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.1),
-        duration: Duration(seconds: 2),
+        backgroundColor: Colors.red.withOpacity(0.5),
+        colorText: Colors.white,
       );
     }
   }

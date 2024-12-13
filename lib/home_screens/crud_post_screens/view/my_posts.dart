@@ -12,6 +12,7 @@ class MyPostsScreen extends StatelessWidget {
   const MyPostsScreen({super.key});
 
   int _calculateTotalViews(List<Post> posts) {
+    // ignore: avoid_types_as_parameter_names
     return posts.fold(0, (sum, post) => sum + post.views);
   }
 
