@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
 import 'package:mad_project/home_screens/posts_screens/model/review_model.dart';
+import 'package:mad_project/utils/logging.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -176,7 +177,7 @@ class PostController extends GetxController {
 
     // First check: Don't increment if user is owner or has viewed
     if (post.userId == user.uid) {
-      print('Post owner viewing - no increment');
+      logger.i('Post owner viewing - no increment');
       return;
     }
 
@@ -193,7 +194,7 @@ class PostController extends GetxController {
 
       // Second check: Verify user hasn't already viewed
       if (currentPost.viewedBy.contains(user.uid)) {
-        print('User already viewed - no increment');
+        logger.i('User already viewed - no increment');
         return;
       }
 
@@ -203,7 +204,7 @@ class PostController extends GetxController {
         'viewedBy': FieldValue.arrayUnion([user.uid])
       });
     } catch (e) {
-      print('Error incrementing view: $e');
+      logger.e('Error incrementing view: $e');
     }
   }
 
@@ -238,7 +239,7 @@ class PostController extends GetxController {
         currentCity.value = placemarks.first.locality ?? 'Lahore';
       }
     } catch (e) {
-      print('Location error: $e');
+      logger.e('Location error: $e');
       // Keep default 'Lahore' on error
     }
   }
@@ -346,7 +347,7 @@ class PostController extends GetxController {
 
       await postRef.update({'rating': averageRating.toStringAsFixed(1)});
     } catch (e) {
-      print('Error updating post rating: $e');
+      logger.e('Error updating post rating: $e');
     }
   }
 
@@ -387,7 +388,7 @@ class PostController extends GetxController {
 
       await postRef.update({'rating': averageRating.toStringAsFixed(1)});
     } catch (e) {
-      print('Error recalculating rating: $e');
+      logger.e('Error recalculating rating: $e');
     }
   }
 
@@ -406,7 +407,7 @@ class PostController extends GetxController {
         }
       }
     } catch (e) {
-      print('Error refreshing post: $e');
+      logger.e('Error refreshing post: $e');
     }
   }
 

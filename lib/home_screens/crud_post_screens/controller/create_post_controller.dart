@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mad_project/home_screens/master_nav/controller/master_nav_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
+import 'package:mad_project/utils/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CreatePostController extends GetxController {
@@ -76,7 +77,7 @@ class CreatePostController extends GetxController {
         phoneController.text = cleanPhone;
       }
     } catch (e) {
-      print('Error loading phone number: $e');
+      logger.e('Error loading phone number: $e');
     }
   }
 
