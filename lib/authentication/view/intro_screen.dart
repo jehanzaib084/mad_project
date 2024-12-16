@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:mad_project/assets.dart';
-import 'package:mad_project/authentication/controller/auth_controller.dart';
 
 class IntroScreen extends StatelessWidget {
-  IntroScreen({super.key});
+  const IntroScreen({super.key});
 
-  final AuthController authController = Get.put(AuthController());
 
   Future<void> _onIntroEnd() async {
     Get.offAllNamed('/login');

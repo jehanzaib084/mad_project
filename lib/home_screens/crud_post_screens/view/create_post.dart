@@ -1,4 +1,3 @@
-// create_post.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/home_screens/crud_post_screens/controller/create_post_controller.dart';
@@ -18,6 +17,7 @@ class CreatePostScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Create New Post'),
       ),
+      resizeToAvoidBottomInset: true, // Allows the screen to resize when the keyboard appears
       body: Stack(
         children: [
           Obx(() => Stepper(

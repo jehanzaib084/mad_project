@@ -26,6 +26,7 @@ class MasterNav extends StatelessWidget {
       extendBodyBehindAppBar: true,
       extendBody: true,
       backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           Positioned.fill(
@@ -54,7 +55,6 @@ class MasterNav extends StatelessWidget {
                   currentIndex: navController.selectedIndex.value,
                   onTap: navController.changeTabIndex,
                   type: BottomNavigationBarType.fixed,
-                  // backgroundColor: Colors.transparent, // Handled by Container
                   selectedItemColor: isDarkMode
                       ? Assets.btnBgColor.withOpacity(0.9)
                       : Assets.btnBgColor,
