@@ -147,12 +147,17 @@ class AuthController extends GetxController {
   // Modify completeProfile method
   Future<void> completeProfile(String email, String password, String firstName,
       String lastName, int age, String phoneNumber) async {
+
+        final formattedPhone = phoneNumber.startsWith('+92') 
+        ? phoneNumber 
+        : '+92$phoneNumber';
+
     UserModel userModel = UserModel(
       uid: '',
       firstName: firstName,
       lastName: lastName,
       age: age,
-      phoneNumber: phoneNumber,
+      phoneNumber: formattedPhone, // Use formatted phone number
       email: email,
       profilePicUrl: profileImageBase64.value,
     );

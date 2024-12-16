@@ -159,8 +159,17 @@ class ProfileUpdateScreen extends StatelessWidget {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        prefixText: '+92 ',
-                        prefixIcon: const Icon(Icons.phone_outlined),
+                        prefixIcon: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            SizedBox(width: 10),
+                            Icon(Icons.phone_outlined),
+                            Text(
+                              '+92 ',
+                              style: TextStyle(color: Colors.black, fontSize: 14),
+                            ),
+                          ],
+                        ),
                       ),
                       keyboardType: TextInputType.phone,
                       inputFormatters: [
