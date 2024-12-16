@@ -21,7 +21,9 @@ class FAQScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildFAQItem('🔑 How do I reset my password?', 'To reset your password, go to the login screen and click on "Forgot Password". Follow the instructions to reset your password.'),
+            const Divider(),
             _buildFAQItem('📝 How do I update my profile?', 'To update your profile, go to the settings screen and click on "Profile". You can update your personal information there.'),
+            const Divider(),
             _buildFAQItem('📧 How do I contact support?', 'You can contact support by emailing us at support@example.com. We are here to help you with any issues you may have.'),
           ],
         ),
@@ -29,7 +31,7 @@ class FAQScreen extends StatelessWidget {
     );
   }
 
-  static Widget _buildFAQItem(String question, String answer) {
+  Widget _buildFAQItem(String question, String answer) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(

@@ -10,18 +10,59 @@ class TermsScreen extends StatelessWidget {
         title: const Text('Terms & Conditions'),
         centerTitle: true,
       ),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
-        child: Text(
-          '📜 Terms & Conditions\n\n'
-          'Welcome to our application. By using this app, you agree to the following terms and conditions:\n\n'
-          '1. 📱 Use of the App: You agree to use the app only for lawful purposes and in a way that does not infringe the rights of others.\n'
-          '2. 📝 User Content: You are responsible for any content you upload or share through the app. Ensure that it does not violate any laws or regulations.\n'
-          '3. 🔒 Privacy: We respect your privacy and are committed to protecting your personal information. Please review our privacy policy for more details.\n'
-          '4. 🔄 Changes to Terms: We may update these terms from time to time. Continued use of the app constitutes acceptance of the updated terms.\n\n'
-          'If you have any questions or concerns about these terms, please contact us at support@example.com.',
-          style: TextStyle(fontSize: 16.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '📜 Terms & Conditions',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            _buildTermItem(
+              '📱 Use of the App',
+              'You agree to use the app only for lawful purposes and in a way that does not infringe the rights of others.',
+            ),
+            const Divider(),
+            _buildTermItem(
+              '📝 User Content',
+              'You are responsible for any content you upload or share through the app. Ensure that it does not violate any laws or regulations.',
+            ),
+            const Divider(),
+            _buildTermItem(
+              '🔒 Privacy',
+              'We respect your privacy and are committed to protecting your personal information. Please review our privacy policy for more details.',
+            ),
+            const Divider(),
+            _buildTermItem(
+              '🔄 Changes to Terms',
+              'We may update these terms from time to time. Continued use of the app constitutes acceptance of the updated terms.',
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'If you have any questions or concerns about these terms, please contact us at support@example.com.',
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTermItem(String title, String description) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          const SizedBox(height: 4),
+          Text(description, style: const TextStyle(fontSize: 16)),
+        ],
       ),
     );
   }
