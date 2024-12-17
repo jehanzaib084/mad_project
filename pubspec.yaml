@@ -29,6 +29,11 @@ dependencies:
   geocoding: ^2.1.1
   logger: ^2.5.0
   path_provider: ^2.1.5
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+  flutter_native_splash: ^2.4.3
+  google_maps_flutter: ^2.5.0
+  
 
 dev_dependencies:
   flutter_test:
@@ -43,4 +48,5 @@ flutter:
     - assets/bg_images/
     - assets/intro_images/
     - assets/profile_pic/
+    - assets/splash_image/
     - assets/

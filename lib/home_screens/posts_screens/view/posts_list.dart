@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:mad_project/home_screens/posts_screens/controller/favorite_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/controller/posts_screen_controller.dart';
 import 'package:mad_project/home_screens/posts_screens/model/post_model.dart';
+import 'package:mad_project/home_screens/posts_screens/view/map_view.dart';
 import 'package:mad_project/home_screens/posts_screens/view/post_detail_view.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -45,16 +46,14 @@ class PostsList extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected && !isDisabled
                 ? Colors.blue
-                : (Get.isDarkMode
-                    ? Colors.black
-                    : Colors.white),
+                : (Get.isDarkMode ? Colors.black : Colors.white),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isDisabled
                   ? Colors.grey
                   : isSelected
-                            ? Colors.white
-                            : (Get.isDarkMode ? Colors.white : Colors.black),
+                      ? Colors.white
+                      : (Get.isDarkMode ? Colors.white : Colors.black),
             ),
           ),
           child: Row(
@@ -64,9 +63,9 @@ class PostsList extends StatelessWidget {
                 size: 16,
                 color: isDisabled
                     ? Colors.grey
-                    :  isSelected
-                            ? Colors.white
-                            : (Get.isDarkMode ? Colors.white : Colors.black),
+                    : isSelected
+                        ? Colors.white
+                        : (Get.isDarkMode ? Colors.white : Colors.black),
               ),
               SizedBox(width: 4),
               Text(
@@ -74,9 +73,9 @@ class PostsList extends StatelessWidget {
                 style: TextStyle(
                   color: isDisabled
                       ? Colors.grey
-                      :  isSelected
-                            ? Colors.white
-                            : (Get.isDarkMode ? Colors.white : Colors.black),
+                      : isSelected
+                          ? Colors.white
+                          : (Get.isDarkMode ? Colors.white : Colors.black),
                 ),
               ),
             ],
@@ -94,15 +93,14 @@ class PostsList extends StatelessWidget {
         actions: [
           Obx(() => GestureDetector(
                 onTap: () {
-                  if (postController.currentCity.value ==
-                      'Location Unavailable') {
+                  if (postController.currentCity.value == 'Location Unavailable') {
                     Get.snackbar(
                       'Location Disabled',
                       'Please enable location services.',
                       snackPosition: SnackPosition.BOTTOM,
                     );
                   } else {
-                    // Handle location tap - implement map view later
+                    Get.to(() => MapView());
                   }
                 },
                 child: Padding(

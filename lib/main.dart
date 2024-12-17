@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mad_project/authentication/view/intro_screen.dart';
 import 'package:mad_project/home_screens/master_nav/master_nav.dart';
+import 'package:mad_project/home_screens/posts_screens/controller/posts_screen_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'pages/pages.dart';
@@ -20,7 +21,7 @@ Future<void> main() async {
   );
 
   // Initialize controllers
-  
+  Get.put(PostController());
 
   runApp(const MyApp());
 }
