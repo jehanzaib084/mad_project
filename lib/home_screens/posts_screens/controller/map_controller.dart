@@ -3,6 +3,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mad_project/utils/logging.dart';
 
 class MapController1 extends GetxController {
   final Rx<LatLng> currentLocation = LatLng(0, 0).obs;
@@ -38,7 +39,7 @@ class MapController1 extends GetxController {
       updateCityName(position.latitude, position.longitude);
       isLocationFetched.value = true;
     } catch (e) {
-      print('Could not get current location: $e');
+      logger.i('Could not get current location: $e');
     }
   }
 
