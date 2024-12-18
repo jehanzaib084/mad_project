@@ -18,6 +18,9 @@ A new Flutter project for mobile application development, integrating Firebase f
 - Image Picker for profile pictures
 - Firestore for data storage
 - Shared Preferences for local storage
+- Google Maps Integration
+- Location Services using Geolocator
+- Cached Network Images
 
 ## Installation
 
@@ -53,7 +56,10 @@ A new Flutter project for mobile application development, integrating Firebase f
 - get:
 - image_picker:
 - shared_preferences:
-
+- geolocator:
+- geocoding:
+- google_maps_flutter:
+- cached_network_image:
 
 ## License
 
